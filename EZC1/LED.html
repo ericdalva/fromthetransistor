@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>LED Display</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+        }
+        #led {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            margin: 100px auto;
+            transition: all 0.1s ease;
+            background-color: #300;  /* Dim red when off */
+            box-shadow: 0 0 0px #f00;
+        }
+        #led.on {
+            background-color: #f00;  /* Bright red when on */
+            box-shadow: 0 0 50px #f00;
+        }
+    </style>
+</head>
+<body>
+    <div id="led"></div>
+    <script>
+        const led = document.getElementById('led');
+        
+        // Function to fetch and update LED state
+        async function updateLED() {
+            try {
+                const response = await fetch('led_state.txt');
+                const state = await response.text();
+                led.className = state.trim() === "1" ? "on" : "";
+            } catch (e) {
+                console.error('Error reading LED state:', e);
+            }
+        }
+
+        // Update every 100ms
+        setInterval(updateLED, 100);
+    </script>
+</body>
+</html>
