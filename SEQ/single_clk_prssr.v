@@ -21,6 +21,11 @@ module read_only_ram (address, instr)
 endmodule
 
 module banked_memory (clk, iaddr, maddr, mok, iok, instr, wenable, renable, wvalue, rvalue)
+    parameter word_size = 8; //1 byte
+    parameter word_count = 512;
+    parameter address_size = 9; //log2 word count
+    parameter mem_size = 8192;
+    
     input clk;
     input [63:0] iaddr, maddr;
     input wenable, renable;
@@ -35,35 +40,167 @@ module banked_memory (clk, iaddr, maddr, mok, iok, instr, wenable, renable, wval
     // that each return a byte at a time. then we wrap our mem space through the 
     // banks so that byte 1 is in bank 1 byte 2 bank2 and we do it mod 16 so
     // the last bits of the mem addr tell us which bank it is in, do it sequential
-    // so first 60 bits tell us what byte in the bank to look for
+    // so first 60 bits tell us what byte in the bank to look fo
+    
+    //instruction bytes
+    wire [7:0] ib0, ib1, ib2, ib3, ib4, ib5, ib6, ib7, ib8, ib9;
+    // data bytes
+    wire [7:0] db0, db1, db2, db3, db4, db5, db6, db7; 
+
+    wire [3:0] ibid = iaddr[3:0]; //instruction bank id
+    wire [59:0] iindex = iaddr[63:4];
+    wire [59:0] iindexp1 = iindex +1;
+
+    wire [3:0] mbid = maddr[3:0]; //memory bank id
+    wire [59:0] mindex = maddr[63:4];
+    wire [59:0] mindexp1 = mindex +1;
+
+
     
 
 
-//dual ported random access memory where we never write to the 2nd port
-//could add another enable and wval.
+
+    //wires and bank hookups
+    wire [address_size -1:0] iaddr0, maddr0;
+    wire [address_size -1:0] iaddr1, maddr1;
+    wire [address_size -1:0] iaddr2, maddr2;
+    wire [address_size -1:0] iaddr3, maddr3;
+    wire [address_size -1:0] iaddr4, maddr4;
+    wire [address_size -1:0] iaddr5, maddr5;
+    wire [address_size -1:0] iaddr6, maddr6;
+    wire [address_size -1:0] iaddr7, maddr7;
+    wire [address_size -1:0] iaddr8, maddr8;
+    wire [address_size -1:0] iaddr9, maddr9;
+    wire [address_size -1:0] iaddr10, maddr10;
+    wire [address_size -1:0] iaddr11, maddr11;
+    wire [address_size -1:0] iaddr12, maddr12;
+    wire [address_size -1:0] iaddr13, maddr13;
+    wire [address_size -1:0] iaddr14, maddr14;
+    wire [address_size -1:0] iaddr15, maddr15;
+
+    wire [word_size -1:0] wval0, mval0, ival0;
+    wire [word_size -1:0] wval1, mval1, ival1;
+    wire [word_size -1:0] wval2, mval2, ival2;
+    wire [word_size -1:0] wval3, mval3, ival3;
+    wire [word_size -1:0] wval4, mval4, ival4;
+    wire [word_size -1:0] wval5, mval5, ival5;
+    wire [word_size -1:0] wval6, mval6, ival6;
+    wire [word_size -1:0] wval7, mval7, ival7;
+    wire [word_size -1:0] wval8, mval8, ival8;
+    wire [word_size -1:0] wval9, mval9, ival9;
+    wire [word_size -1:0] wval10, mval10, ival10;
+    wire [word_size -1:0] wval11, mval11, ival11;
+    wire [word_size -1:0] wval12, mval12, ival12;
+    wire [word_size -1:0] wval13, mval13, ival13;
+    wire [word_size -1:0] wval14, mval14, ival14;
+    wire [word_size -1:0] wval15, mval15, ival15;
+
+    wire wenable0;
+    wire wenable1;
+    wire wenable2;
+    wire wenable3;
+    wire wenable4;
+    wire wenable5;
+    wire wenable6;
+    wire wenable7;
+    wire wenable8;
+    wire wenable9;
+    wire wenable10;
+    wire wenable11;
+    wire wenable12;
+    wire wenable13;
+    wire wenable14;
+    wire wenable15;
+
+    bank bank0(clk, iaddr0, maddr0, wenable0, wval0, ival0, mval0);
+    bank bank1(clk, iaddr1, maddr1, wenable1, wval1, ival1, mval1);
+    bank bank2(clk, iaddr2, maddr2, wenable2, wval2, ival2, mval2);
+    bank bank3(clk, iaddr3, maddr3, wenable3, wval3, ival3, mval3);
+    bank bank4(clk, iaddr4, maddr4, wenable4, wval4, ival4, mval4);
+    bank bank5(clk, iaddr5, maddr5, wenable5, wval5, ival5, mval5);
+    bank bank6(clk, iaddr6, maddr6, wenable6, wval6, ival6, mval6);
+    bank bank7(clk, iaddr7, maddr7, wenable7, wval7, ival7, mval7);
+    bank bank8(clk, iaddr8, maddr8, wenable8, wval8, ival8, mval8);
+    bank bank9(clk, iaddr9, maddr9, wenable9, wval9, ival9, mval9);
+    bank bank10(clk, iaddr10, maddr10, wenable10, wval10, ival10, mval10);
+    bank bank11(clk, iaddr11, maddr11, wenable11, wval11, ival11, mval11);
+    bank bank12(clk, iaddr12, maddr12, wenable12, wval12, ival12, mval12);
+    bank bank13(clk, iaddr13, maddr13, wenable13, wval13, ival13, mval13);
+    bank bank14(clk, iaddr14, maddr14, wenable14, wval14, ival14, mval14);
+    bank bank15(clk, iaddr15, maddr15, wenable15, wval15, ival15, mval15);
+
+
+    //Determine instruction addr for the banks
+
+    assign iaddr0 = ibid >= 7 ? iindexp1 : iindex; //wraps to plus one 
+    assign iaddr1 = ibid >= 8 ? iindexp1 : iindex;
+    assign iaddr2 = ibid >= 9 ? iindexp1 : iindex;
+    assign iaddr3 = ibid >= 10 ? iindexp1 : iindex;
+    assign iaddr4 = ibid >= 11 ? iindexp1 : iindex;
+    assign iaddr5 = ibid >= 12 ? iindexp1 : iindex;
+    assign iaddr6 = ibid >= 13 ? iindexp1 : iindex;
+    assign iaddr7 = ibid >= 14 ? iindexp1 : iindex;
+    assign iaddr8 = ibid >= 15 ? iindexp1 : iindex;
+    assign iaddr9 = iindex;
+    assign iaddr10 = iindex;
+    assign iaddr11 = iindex;
+    assign iaddr12 = iindex;
+    assign iaddr13 = iindex;
+    assign iaddr14 = iindex;
+    assign iaddr15 = iindex;
+
+    //Determine mem addr for the banks
+    assign maddr0 = ibid >= 9 ? mindexp1 : mindex;
+    assign maddr1 = ibid >= 10 ? mindexp1 : mindex;
+    assign maddr2 = ibid >= 11 ? mindexp1 : mindex;
+    assign maddr3 = ibid >= 12 ? mindexp1 : mindex;
+    assign maddr4 = ibid >= 13 ? mindexp1 : mindex;
+    assign maddr5 = ibid >= 14 ? mindexp1 : mindex;
+    assign maddr6 = ibid >= 15 ? mindexp1 : mindex;
+    assign maddr7 = mindex;
+    assign maddr8 = mindex;
+    assign maddr9 = mindex;
+    assign maddr10 = mindex;
+    assign maddr11 = mindex;
+    assign maddr12 = mindex;
+
+    // getting bytes of instruction 
+    
+
+
+
+
+
+
+//dual ported random access memory where we will use A as the instr port.
 //CS:APP says this works for simulation but real hardware does not normally
 // allow combinatorial reads.
-module bank (clk, iaddr, maddr, wenable, wval, mval, ival)
+module bank (clk, addrA, addrB, wenableA, wenableB, wvalA, wvalB, valA, valB)
     parameter word_size = 8; //1 byte
     parameter word_count = 512;
     parameter address_size = 9; //log2 word count
 
     input clk;
-    input [address_size - 1:0] iaddr;
-    input [address_size - 1:0] maddr;
-    input wenable;
+    input wenableA wenableB;
+    input [address_size - 1:0] addrA, addrB;
+    input [word_size -1:0] wvalA, wvalB;
+
     output [word_size - 1:0] mval, ival;
 
     reg [word_size - 1:0] mem [word_count -1:0];
 
-    assign mval = mem[maddr]; //mux over 8bit regs
-    assign ival = mem[iaddr];
+    assign valA = mem[addrA]; //mux over 8bit regs
+    assign valB = mem[addrB];
+
 
     always @(posedge clk) begin
-        if (wenable)
-            mem[maddr] <= wval;
+        if (wenableA)
+            mem[addrA] <= wvalA;
+        if (wenableB)
+            mem[addrB] <= wvalB;
     end
 endmodule
+
 
 
 module clked_register (clk, write_enable, update_val, output_val, reset, reset_val)
