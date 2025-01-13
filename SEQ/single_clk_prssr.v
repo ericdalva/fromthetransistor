@@ -20,6 +20,52 @@ module read_only_ram (address, instr)
 
 endmodule
 
+module banked_memory (clk, iaddr, maddr, mok, iok, instr, wenable, renable, wvalue, rvalue)
+    input clk;
+    input [63:0] iaddr, maddr;
+    input wenable, renable;
+    input [63:0] wvalue;
+
+    output [79:0] instr;
+    output [63:0] rvalue;
+    output iok, mok;
+
+    //out computer has a memory space of bytes. we want a memory circuit that
+    //can access 8 or 10 bytes at a time. way we do it is that we have banks
+    // that each return a byte at a time. then we wrap our mem space through the 
+    // banks so that byte 1 is in bank 1 byte 2 bank2 and we do it mod 16 so
+    // the last bits of the mem addr tell us which bank it is in, do it sequential
+    // so first 60 bits tell us what byte in the bank to look for
+    
+
+
+//dual ported random access memory where we never write to the 2nd port
+//could add another enable and wval.
+//CS:APP says this works for simulation but real hardware does not normally
+// allow combinatorial reads.
+module bank (clk, iaddr, maddr, wenable, wval, mval, ival)
+    parameter word_size = 8; //1 byte
+    parameter word_count = 512;
+    parameter address_size = 9; //log2 word count
+
+    input clk;
+    input [address_size - 1:0] iaddr;
+    input [address_size - 1:0] maddr;
+    input wenable;
+    output [word_size - 1:0] mval, ival;
+
+    reg [word_size - 1:0] mem [word_count -1:0];
+
+    assign mval = mem[maddr]; //mux over 8bit regs
+    assign ival = mem[iaddr];
+
+    always @(posedge clk) begin
+        if (wenable)
+            mem[maddr] <= wval;
+    end
+endmodule
+
+
 module clked_register (clk, write_enable, update_val, output_val, reset, reset_val)
     parameter reg_size = 64
 
@@ -255,6 +301,15 @@ module alu (valA, valB, valC, aluFUNC, CCodes, outVal)
                     aluFUNC == AND ? valA & valB : valA - valB;
 
     //set CCodes
+    //only need 3 bits but not going to change num
+    // codes are is_zero, is negative, overflow occured 
+
+    assign CCodes[2] = outVal == 0;
+    assign CCodes[1] = outVal[63];
+    assign CCodes[0] = aluFUNC == ADD ? ((valA[63] == valB[63]) & (valA[63] != outVal[63])) :
+                        aluFUNC == SUB ? ((~valA[63] == valb[63]) & (~valA[63] != outVal[63])) : 0;
+    
+
 endmodule
 
     
@@ -312,6 +367,7 @@ module processor (clk)
     reg_file regs (regA, regB, valA, valB, destA, destB, dest_val_A, dest_val_B);
 
     alu ALU (valA, valB, valC, aluFUNC, CCodes, ALUOut);
+
 
     
 
