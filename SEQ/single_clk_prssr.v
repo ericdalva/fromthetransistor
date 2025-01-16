@@ -170,347 +170,324 @@ module banked_memory (clk, iaddr, maddr, mok, iok, instr, wenable, renable, wval
     // this part is gross! I am sure there is a better way but I also 
     // spent more time thinking about it then it took to actually just implement it
 
-    ib0 = !iok ? 0 :
-            ibid == 0 ? ival0 :
-            ibid == 1 ? ival1 :
-            ibid == 2 ? ival2 :
-            ibid == 3 ? ival3 :
-            ibid == 4 ? ival4 :
-            ibid == 5 ? ival5 :
-            ibid == 6 ? ival6 :
-            ibid == 7 ? ival7 :
-            ibid == 8 ? ival8 :
-            ibid == 9 ? ival9 :
-            ibid == 10 ? ival10 :
-            ibid == 11 ? ival11 :
-            ibid == 12 ? ival12 :
-            ibid == 13 ? ival13 :
-            ibid == 14 ? ival14 :
-            ibid == 15 ? ival15 :
-            0;
+        assign ib0 = !iok ? 0 :
+                ibid == 0 ? ival0 :
+                ibid == 1 ? ival1 :
+                ibid == 2 ? ival2 :
+                ibid == 3 ? ival3 :
+                ibid == 4 ? ival4 :
+                ibid == 5 ? ival5 :
+                ibid == 6 ? ival6 :
+                ibid == 7 ? ival7 :
+                ibid == 8 ? ival8 :
+                ibid == 9 ? ival9 :
+                ibid == 10 ? ival10 :
+                ibid == 11 ? ival11 :
+                ibid == 12 ? ival12 :
+                ibid == 13 ? ival13 :
+                ibid == 14 ? ival14 :
+                ibid == 15 ? ival15 :
+                0;
 
-    ib1 = !iok ? 0 :
-            ibid == 0 ? ival1 :
-            ibid == 1 ? ival2 :
-            ibid == 2 ? ival3 :
-            ibid == 3 ? ival4 :
-            ibid == 4 ? ival5 :
-            ibid == 5 ? ival6 :
-            ibid == 6 ? ival7 :
-            ibid == 7 ? ival8 :
-            ibid == 8 ? ival9 :
-            ibid == 9 ? ival10 :
-            ibid == 10 ? ival11 :
-            ibid == 11 ? ival12 :
-            ibid == 12 ? ival13 :
-            ibid == 13 ? ival14 :
-            ibid == 14 ? ival15 :
-            ibid == 15 ? ival0 :
-            0;
+        assign ib1 = !iok ? 0 :
+                ibid == 0 ? ival1 :
+                ibid == 1 ? ival2 :
+                ibid == 2 ? ival3 :
+                ibid == 3 ? ival4 :
+                ibid == 4 ? ival5 :
+                ibid == 5 ? ival6 :
+                ibid == 6 ? ival7 :
+                ibid == 7 ? ival8 :
+                ibid == 8 ? ival9 :
+                ibid == 9 ? ival10 :
+                ibid == 10 ? ival11 :
+                ibid == 11 ? ival12 :
+                ibid == 12 ? ival13 :
+                ibid == 13 ? ival14 :
+                ibid == 14 ? ival15 :
+                ibid == 15 ? ival0 :
+                0;
 
-    ib2 = !iok ? 0 :
-            ibid == 0 ? ival2 :
-            ibid == 1 ? ival3 :
-            ibid == 2 ? ival4 :
-            ibid == 3 ? ival5 :
-            ibid == 4 ? ival6 :
-            ibid == 5 ? ival7 :
-            ibid == 6 ? ival8 :
-            ibid == 7 ? ival9 :
-            ibid == 8 ? ival10 :
-            ibid == 9 ? ival11 :
-            ibid == 10 ? ival12 :
-            ibid == 11 ? ival13 :
-            ibid == 12 ? ival14 :
-            ibid == 13 ? ival15 :
-            ibid == 14 ? ival0 :
-            ibid == 15 ? ival1 :
-            0;
+        assign ib2 = !iok ? 0 :
+                ibid == 0 ? ival2 :
+                ibid == 1 ? ival3 :
+                ibid == 2 ? ival4 :
+                ibid == 3 ? ival5 :
+                ibid == 4 ? ival6 :
+                ibid == 5 ? ival7 :
+                ibid == 6 ? ival8 :
+                ibid == 7 ? ival9 :
+                ibid == 8 ? ival10 :
+                ibid == 9 ? ival11 :
+                ibid == 10 ? ival12 :
+                ibid == 11 ? ival13 :
+                ibid == 12 ? ival14 :
+                ibid == 13 ? ival15 :
+                ibid == 14 ? ival0 :
+                ibid == 15 ? ival1 :
+                0;
 
-    ib3 = !iok ? 0 :
-            ibid == 0 ? ival3 :
-            ibid == 1 ? ival4 :
-            ibid == 2 ? ival5 :
-            ibid == 3 ? ival6 :
-            ibid == 4 ? ival7 :
-            ibid == 5 ? ival8 :
-            ibid == 6 ? ival9 :
-            ibid == 7 ? ival10 :
-            ibid == 8 ? ival11 :
-            ibid == 9 ? ival12 :
-            ibid == 10 ? ival13 :
-            ibid == 11 ? ival14 :
-            ibid == 12 ? ival15 :
-            ibid == 13 ? ival0 :
-            ibid == 14 ? ival1 :
-            ibid == 15 ? ival2 :
-            0;
+        assign ib3 = !iok ? 0 :
+                ibid == 0 ? ival3 :
+                ibid == 1 ? ival4 :
+                ibid == 2 ? ival5 :
+                ibid == 3 ? ival6 :
+                ibid == 4 ? ival7 :
+                ibid == 5 ? ival8 :
+                ibid == 6 ? ival9 :
+                ibid == 7 ? ival10 :
+                ibid == 8 ? ival11 :
+                ibid == 9 ? ival12 :
+                ibid == 10 ? ival13 :
+                ibid == 11 ? ival14 :
+                ibid == 12 ? ival15 :
+                ibid == 13 ? ival0 :
+                ibid == 14 ? ival1 :
+                ibid == 15 ? ival2 :
+                0;
 
-    ib4 = !iok ? 0 :
-            ibid == 0 ? ival4 :
-            ibid == 1 ? ival5 :
-            ibid == 2 ? ival6 :
-            ibid == 3 ? ival7 :
-            ibid == 4 ? ival8 :
-            ibid == 5 ? ival9 :
-            ibid == 6 ? ival10 :
-            ibid == 7 ? ival11 :
-            ibid == 8 ? ival12 :
-            ibid == 9 ? ival13 :
-            ibid == 10 ? ival14 :
-            ibid == 11 ? ival15 :
-            ibid == 12 ? ival0 :
-            ibid == 13 ? ival1 :
-            ibid == 14 ? ival2 :
-            ibid == 15 ? ival3 :
-            0;
+        assign ib4 = !iok ? 0 :
+                ibid == 0 ? ival4 :
+                ibid == 1 ? ival5 :
+                ibid == 2 ? ival6 :
+                ibid == 3 ? ival7 :
+                ibid == 4 ? ival8 :
+                ibid == 5 ? ival9 :
+                ibid == 6 ? ival10 :
+                ibid == 7 ? ival11 :
+                ibid == 8 ? ival12 :
+                ibid == 9 ? ival13 :
+                ibid == 10 ? ival14 :
+                ibid == 11 ? ival15 :
+                ibid == 12 ? ival0 :
+                ibid == 13 ? ival1 :
+                ibid == 14 ? ival2 :
+                ibid == 15 ? ival3 :
+                0;
 
-    ib5 = !iok ? 0 :
-            ibid == 0 ? ival5 :
-            ibid == 1 ? ival6 :
-            ibid == 2 ? ival7 :
-            ibid == 3 ? ival8 :
-            ibid == 4 ? ival9 :
-            ibid == 5 ? ival10 :
-            ibid == 6 ? ival11 :
-            ibid == 7 ? ival12 :
-            ibid == 8 ? ival13 :
-            ibid == 9 ? ival14 :
-            ibid == 10 ? ival15 :
-            ibid == 11 ? ival0 :
-            ibid == 12 ? ival1 :
-            ibid == 13 ? ival2 :
-            ibid == 14 ? ival3 :
-            ibid == 15 ? ival4 :
-            0;
+        assign ib5 = !iok ? 0 :
+                ibid == 0 ? ival5 :
+                ibid == 1 ? ival6 :
+                ibid == 2 ? ival7 :
+                ibid == 3 ? ival8 :
+                ibid == 4 ? ival9 :
+                ibid == 5 ? ival10 :
+                ibid == 6 ? ival11 :
+                ibid == 7 ? ival12 :
+                ibid == 8 ? ival13 :
+                ibid == 9 ? ival14 :
+                ibid == 10 ? ival15 :
+                ibid == 11 ? ival0 :
+                ibid == 12 ? ival1 :
+                ibid == 13 ? ival2 :
+                ibid == 14 ? ival3 :
+                ibid == 15 ? ival4 :
+                0;
 
-    ib6 = !iok ? 0 :
-            ibid == 0 ? ival6 :
-            ibid == 1 ? ival7 :
-            ibid == 2 ? ival8 :
-            ibid == 3 ? ival9 :
-            ibid == 4 ? ival10 :
-            ibid == 5 ? ival11 :
-            ibid == 6 ? ival12 :
-            ibid == 7 ? ival13 :
-            ibid == 8 ? ival14 :
-            ibid == 9 ? ival15 :
-            ibid == 10 ? ival0 :
-            ibid == 11 ? ival1 :
-            ibid == 12 ? ival2 :
-            ibid == 13 ? ival3 :
-            ibid == 14 ? ival4 :
-            ibid == 15 ? ival5 :
-            0;
+        assign ib6 = !iok ? 0 :
+                ibid == 0 ? ival6 :
+                ibid == 1 ? ival7 :
+                ibid == 2 ? ival8 :
+                ibid == 3 ? ival9 :
+                ibid == 4 ? ival10 :
+                ibid == 5 ? ival11 :
+                ibid == 6 ? ival12 :
+                ibid == 7 ? ival13 :
+                ibid == 8 ? ival14 :
+                ibid == 9 ? ival15 :
+                ibid == 10 ? ival0 :
+                ibid == 11 ? ival1 :
+                ibid == 12 ? ival2 :
+                ibid == 13 ? ival3 :
+                ibid == 14 ? ival4 :
+                ibid == 15 ? ival5 :
+                0;
 
-    ib7 = !iok ? 0 :
-            ibid == 0 ? ival7 :
-            ibid == 1 ? ival8 :
-            ibid == 2 ? ival9 :
-            ibid == 3 ? ival10 :
-            ibid == 4 ? ival11 :
-            ibid == 5 ? ival12 :
-            ibid == 6 ? ival13 :
-            ibid == 7 ? ival14 :
-            ibid == 8 ? ival15 :
-            ibid == 9 ? ival0 :
-            ibid == 10 ? ival1 :
-            ibid == 11 ? ival2 :
-            ibid == 12 ? ival3 :
-            ibid == 13 ? ival4 :
-            ibid == 14 ? ival5 :
-            ibid == 15 ? ival6 :
-            0;
+        assign ib7 = !iok ? 0 :
+                ibid == 0 ? ival7 :
+                ibid == 1 ? ival8 :
+                ibid == 2 ? ival9 :
+                ibid == 3 ? ival10 :
+                ibid == 4 ? ival11 :
+                ibid == 5 ? ival12 :
+                ibid == 6 ? ival13 :
+                ibid == 7 ? ival14 :
+                ibid == 8 ? ival15 :
+                ibid == 9 ? ival0 :
+                ibid == 10 ? ival1 :
+                ibid == 11 ? ival2 :
+                ibid == 12 ? ival3 :
+                ibid == 13 ? ival4 :
+                ibid == 14 ? ival5 :
+                ibid == 15 ? ival6 :
+                0;
 
-    ib8 = !iok ? 0 :
-            ibid == 0 ? ival8 :
-            ibid == 1 ? ival9 :
-            ibid == 2 ? ival10 :
-            ibid == 3 ? ival11 :
-            ibid == 4 ? ival12 :
-            ibid == 5 ? ival13 :
-            ibid == 6 ? ival14 :
-            ibid == 7 ? ival15 :
-            ibid == 8 ? ival0 :
-            ibid == 9 ? ival1 :
-            ibid == 10 ? ival2 :
-            ibid == 11 ? ival3 :
-            ibid == 12 ? ival4 :
-            ibid == 13 ? ival5 :
-            ibid == 14 ? ival6 :
-            ibid == 15 ? ival7 :
-            0;
+        assign ib8 = !iok ? 0 :
+                ibid == 0 ? ival8 :
+                ibid == 1 ? ival9 :
+                ibid == 2 ? ival10 :
+                ibid == 3 ? ival11 :
+                ibid == 4 ? ival12 :
+                ibid == 5 ? ival13 :
+                ibid == 6 ? ival14 :
+                ibid == 7 ? ival15 :
+                ibid == 8 ? ival0 :
+                ibid == 9 ? ival1 :
+                ibid == 10 ? ival2 :
+                ibid == 11 ? ival3 :
+                ibid == 12 ? ival4 :
+                ibid == 13 ? ival5 :
+                ibid == 14 ? ival6 :
+                ibid == 15 ? ival7 :
+                0;
 
-    ib9 = !iok ? 0 :
-            ibid == 0 ? ival9 :
-            ibid == 1 ? ival10 :
-            ibid == 2 ? ival11 :
-            ibid == 3 ? ival12 :
-            ibid == 4 ? ival13 :
-            ibid == 5 ? ival14 :
-            ibid == 6 ? ival15 :
-            ibid == 7 ? ival0 :
-            ibid == 8 ? ival1 :
-            ibid == 9 ? ival2 :
-            ibid == 10 ? ival3 :
-            ibid == 11 ? ival4 :
-            ibid == 12 ? ival5 :
-            ibid == 13 ? ival6 :
-            ibid == 14 ? ival7 :
-            ibid == 15 ? ival8 :
-            0;
-    
-    db0 = mok ? 0 :
-            mbid == 0 ? mval0 :
-            mbid == 1 ? mval1 :
-            mbid == 2 ? mval2 :
-            mbid == 3 ? mval3 :
-            mbid == 4 ? mval4 :
-            mbid == 5 ? mval5 :
-            mbid == 6 ? mval6 :
-            mbid == 7 ? mval7 :
-            mbid == 8 ? mval8 :
-            mbid == 9 ? mval9 :
-            mbid == 10 ? mval10 :
-            mbid == 11 ? mval11 :
-            mbid == 12 ? mval12 :
-            mbid == 13 ? mval13 :
-            mbid == 14 ? mval14 :
-            mbid == 15 ? mval15 :
-            0;
+        assign ib9 = !iok ? 0 :
+                ibid == 0 ? ival9 :
+                ibid == 1 ? ival10 :
+                ibid == 2 ? ival11 :
+                ibid == 3 ? ival12 :
+                ibid == 4 ? ival13 :
+                ibid == 5 ? ival14 :
+                ibid == 6 ? ival15 :
+                ibid == 7 ? ival0 :
+                ibid == 8 ? ival1 :
+                ibid == 9 ? ival2 :
+                ibid == 10 ? ival3 :
+                ibid == 11 ? ival4 :
+                ibid == 12 ? ival5 :
+                ibid == 13 ? ival6 :
+                ibid == 14 ? ival7 :
+                ibid == 15 ? ival8 :
+                0;
 
-    db1 = mok ? 0 :
-            mbid == 0 ? mval1 :
-            mbid == 1 ? mval2 :
-            mbid == 2 ? mval3 :
-            mbid == 3 ? mval4 :
-            mbid == 4 ? mval5 :
-            mbid == 5 ? mval6 :
-            mbid == 6 ? mval7 :
-            mbid == 7 ? mval8 :
-            mbid == 8 ? mval9 :
-            mbid == 9 ? mval10 :
-            mbid == 10 ? mval11 :
-            mbid == 11 ? mval12 :
-            mbid == 12 ? mval13 :
-            mbid == 13 ? mval14 :
-            mbid == 14 ? mval15 :
-            mbid == 15 ? mval0 :
-            0;
+        assign db0 = mok ? 0 :
+                mbid == 0 ? mval0 :
+                mbid == 1 ? mval1 :
+                mbid == 2 ? mval2 :
+                mbid == 3 ? mval3 :
+                mbid == 4 ? mval4 :
+                mbid == 5 ? mval5 :
+                mbid == 6 ? mval6 :
+                mbid == 7 ? mval7 :
+                mbid == 8 ? mval8 :
+                mbid == 9 ? mval9 :
+                mbid == 10 ? mval10 :
+                mbid == 11 ? mval11 :
+                mbid == 12 ? mval12 :
+                mbid == 13 ? mval13 :
+                mbid == 14 ? mval14 :
+                mbid == 15 ? mval15 :
+                0;
 
-    db2 = mok ? 0 :
-            mbid == 0 ? mval2 :
-            mbid == 1 ? mval3 :
-            mbid == 2 ? mval4 :
-            mbid == 3 ? mval5 :
-            mbid == 4 ? mval6 :
-            mbid == 5 ? mval7 :
-            mbid == 6 ? mval8 :
-            mbid == 7 ? mval9 :
-            mbid == 8 ? mval10 :
-            mbid == 9 ? mval11 :
-            mbid == 10 ? mval12 :
-            mbid == 11 ? mval13 :
-            mbid == 12 ? mval14 :
-            mbid == 13 ? mval15 :
-            mbid == 14 ? mval0 :
-            mbid == 15 ? mval1 :
-            0;
+        assign db1 = mok ? 0 :
+                mbid == 0 ? mval1 :
+                mbid == 1 ? mval2 :
+                mbid == 2 ? mval3 :
+                mbid == 3 ? mval4 :
+                mbid == 4 ? mval5 :
+                mbid == 5 ? mval6 :
+                mbid == 6 ? mval7 :
+                mbid == 7 ? mval8 :
+                mbid == 8 ? mval9 :
+                mbid == 9 ? mval10 :
+                mbid == 10 ? mval11 :
+                mbid == 11 ? mval12 :
+                mbid == 12 ? mval13 :
+                mbid == 13 ? mval14 :
+                mbid == 14 ? mval15 :
+                mbid == 15 ? mval0 :
+                0;
 
-    db3 = mok ? 0 :
-            mbid == 0 ? mval3 :
-            mbid == 1 ? mval4 :
-            mbid == 2 ? mval5 :
-            mbid == 3 ? mval6 :
-            mbid == 4 ? mval7 :
-            mbid == 5 ? mval8 :
-            mbid == 6 ? mval9 :
-            mbid == 7 ? mval10 :
-            mbid == 8 ? mval11 :
-            mbid == 9 ? mval12 :
-            mbid == 10 ? mval13 :
-            mbid == 11 ? mval14 :
-            mbid == 12 ? mval15 :
-            mbid == 13 ? mval0 :
-            mbid == 14 ? mval1 :
-            mbid == 15 ? mval2 :
-            0;
+        assign db2 = mok ? 0 :
+                mbid == 0 ? mval2 :
+                mbid == 1 ? mval3 :
+                mbid == 2 ? mval4 :
+                mbid == 3 ? mval5 :
+                mbid == 4 ? mval6 :
+                mbid == 5 ? mval7 :
+                mbid == 6 ? mval8 :
+                mbid == 7 ? mval9 :
+                mbid == 8 ? mval10 :
+                mbid == 9 ? mval11 :
+                mbid == 10 ? mval12 :
+                mbid == 11 ? mval13 :
+                mbid == 12 ? mval14 :
+                mbid == 13 ? mval15 :
+                mbid == 14 ? mval0 :
+                mbid == 15 ? mval1 :
+                0;
 
-    db4 = mok ? 0 :
-            mbid == 0 ? mval4 :
-            mbid == 1 ? mval5 :
-            mbid == 2 ? mval6 :
-            mbid == 3 ? mval7 :
-            mbid == 4 ? mval8 :
-            mbid == 5 ? mval9 :
-            mbid == 6 ? mval10 :
-            mbid == 7 ? mval11 :
-            mbid == 8 ? mval12 :
-            mbid == 9 ? mval13 :
-            mbid == 10 ? mval14 :
-            mbid == 11 ? mval15 :
-            mbid == 12 ? mval0 :
-            mbid == 13 ? mval1 :
-            mbid == 14 ? mval2 :
-            mbid == 15 ? mval3 :
-            0;
+        assign db3 = mok ? 0 :
+                mbid == 0 ? mval3 :
+                mbid == 1 ? mval4 :
+                mbid == 2 ? mval5 :
+                mbid == 3 ? mval6 :
+                mbid == 4 ? mval7 :
+                mbid == 5 ? mval8 :
+                mbid == 6 ? mval9 :
+                mbid == 7 ? mval10 :
+                mbid == 8 ? mval11 :
+                mbid == 9 ? mval12 :
+                mbid == 10 ? mval13 :
+                mbid == 11 ? mval14 :
+                mbid == 12 ? mval15 :
+                mbid == 13 ? mval0 :
+                mbid == 14 ? mval1 :
+                mbid == 15 ? mval2 :
+                0;
 
-    db5 = mok ? 0 :
-            mbid == 0 ? mval5 :
-            mbid == 1 ? mval6 :
-            mbid == 2 ? mval7 :
-            mbid == 3 ? mval8 :
-            mbid == 4 ? mval9 :
-            mbid == 5 ? mval10 :
-            mbid == 6 ? mval11 :
-            mbid == 7 ? mval12 :
-            mbid == 8 ? mval13 :
-            mbid == 9 ? mval14 :
-            mbid == 10 ? mval15 :
-            mbid == 11 ? mval0 :
-            mbid == 12 ? mval1 :
-            mbid == 13 ? mval2 :
-            mbid == 14 ? mval3 :
-            mbid == 15 ? mval4 :
-            0;
+        assign db4 = mok ? 0 :
+                mbid == 0 ? mval4 :
+                mbid == 1 ? mval5 :
+                mbid == 2 ? mval6 :
+                mbid == 3 ? mval7 :
+                mbid == 4 ? mval8 :
+                mbid == 5 ? mval9 :
+                mbid == 6 ? mval10 :
+                mbid == 7 ? mval11 :
+                mbid == 8 ? mval12 :
+                mbid == 9 ? mval13 :
+                mbid == 10 ? mval14 :
+                mbid == 11 ? mval15 :
+                mbid == 12 ? mval0 :
+                mbid == 13 ? mval1 :
+                mbid == 14 ? mval2 :
+                mbid == 15 ? mval3 :
+                0;
 
-    db6 = mok ? 0 :
-            mbid == 0 ? mval6 :
-            mbid == 1 ? mval7 :
-            mbid == 2 ? mval8 :
-            mbid == 3 ? mval9 :
-            mbid == 4 ? mval10 :
-            mbid == 5 ? mval11 :
-            mbid == 6 ? mval12 :
-            mbid == 7 ? mval13 :
-            mbid == 8 ? mval14 :
-            mbid == 9 ? mval15 :
-            mbid == 10 ? mval0 :
-            mbid == 11 ? mval1 :
-            mbid == 12 ? mval2 :
-            mbid == 13 ? mval3 :
-            mbid == 14 ? mval4 :
-            mbid == 15 ? mval5 :
-            0;
+        assign db5 = mok ? 0 :
+                mbid == 0 ? mval5 :
+                mbid == 1 ? mval6 :
+                mbid == 2 ? mval7 :
+                mbid == 3 ? mval8 :
+                mbid == 4 ? mval9 :
+                mbid == 5 ? mval10 :
+                mbid == 6 ? mval11 :
+                mbid == 7 ? mval12 :
+                mbid == 8 ? mval13 :
+                mbid == 9 ? mval14 :
+                mbid == 10 ? mval15 :
+                mbid == 11 ? mval0 :
+                mbid == 12 ? mval1 :
+                mbid == 13 ? mval2 :
+                mbid == 14 ? mval3 :
+                mbid == 15 ? mval4 :
+                0;
 
-    db7 = mok ? 0 :
-            mbid == 0 ? mval7 :
-            mbid == 1 ? mval8 :
-            mbid == 2 ? mval9 :
-            mbid == 3 ? mval10 :
-            mbid == 4 ? mval11 :
-            mbid == 5 ? mval12 :
-            mbid == 6 ? mval13 :
-            mbid == 7 ? mval14 :
-            mbid == 8 ? mval15 :
-            mbid == 9 ? mval0 :
-            mbid == 10 ? mval1 :
-            mbid == 11 ? mval2 :
-            mbid == 12 ? mval3 :
-            mbid == 13 ? mval4 :
-            mbid == 14 ? mval5 :
-            mbid == 15 ? mval6 :
-            0;
+        assign db6 = mok ? 0 :
+                mbid == 0 ? mval6 :
+                mbid == 1 ? mval7 :
+                mbid == 2 ? mval8 :
+                mbid == 3 ? mval9 :
+                mbid == 4 ? mval10 :
+                mbid == 5 ? mval11 :
+                mbid == 6 ? mval12 :
+                mbid == 7 ? mval13 :
+                mbid == 8 ? mval14 :
+                mbid == 9 ? mval15 :
+                mbid == 10 ? mval0 :
+                mbid == 11 ? mval1 :
+                mbid == 12 ? mval2
 
         //finished reading
     assign instr = {ib0, ib1, ib2, ib3, ib4, ib5, ib6, ib7, ib8, ib9};
@@ -656,6 +633,293 @@ module banked_memory (clk, iaddr, maddr, mok, iok, instr, wenable, renable, wval
                 mbid == 13 ? 0 :
                 mbid == 14 ? 0 : 0;
 
+assign wenable0 = mok ? 0 :          // Window is 9,10,11,12,13,14,15,0
+                mbid == 0 ? 1 :    
+                mbid == 1 ? 0 :
+                mbid == 2 ? 0 :
+                mbid == 3 ? 0 :
+                mbid == 4 ? 0 :
+                mbid == 5 ? 0 : 
+                mbid == 6 ? 0 :
+                mbid == 7 ? 0 :
+                mbid == 8 ? 0 :
+                mbid == 9 ? 1 :
+                mbid == 10 ? 1 :
+                mbid == 11 ? 1 :
+                mbid == 12 ? 1 :
+                mbid == 13 ? 1 :
+                mbid == 14 ? 1 :
+                mbid == 15 ? 1 : 0;
+
+assign wenable1 = mok ? 0 :          // Window is 10,11,12,13,14,15,0,1
+                mbid == 0 ? 1 :
+                mbid == 1 ? 1 :
+                mbid == 2 ? 0 :
+                mbid == 3 ? 0 :
+                mbid == 4 ? 0 :
+                mbid == 5 ? 0 :
+                mbid == 6 ? 0 :
+                mbid == 7 ? 0 :
+                mbid == 8 ? 0 :
+                mbid == 9 ? 0 :
+                mbid == 10 ? 1 :
+                mbid == 11 ? 1 :
+                mbid == 12 ? 1 :
+                mbid == 13 ? 1 :
+                mbid == 14 ? 1 :
+                mbid == 15 ? 1 : 0;
+
+assign wenable2 = mok ? 0 :          // Window is 11,12,13,14,15,0,1,2
+                mbid == 0 ? 1 :
+                mbid == 1 ? 1 :
+                mbid == 2 ? 1 :
+                mbid == 3 ? 0 :
+                mbid == 4 ? 0 :
+                mbid == 5 ? 0 :
+                mbid == 6 ? 0 :
+                mbid == 7 ? 0 :
+                mbid == 8 ? 0 :
+                mbid == 9 ? 0 :
+                mbid == 10 ? 0 :
+                mbid == 11 ? 1 :
+                mbid == 12 ? 1 :
+                mbid == 13 ? 1 :
+                mbid == 14 ? 1 :
+                mbid == 15 ? 1 : 0;
+
+assign wenable3 = mok ? 0 :          // Window is 12,13,14,15,0,1,2,3
+                mbid == 0 ? 1 :
+                mbid == 1 ? 1 :
+                mbid == 2 ? 1 :
+                mbid == 3 ? 1 :
+                mbid == 4 ? 0 :
+                mbid == 5 ? 0 :
+                mbid == 6 ? 0 :
+                mbid == 7 ? 0 :
+                mbid == 8 ? 0 :
+                mbid == 9 ? 0 :
+                mbid == 10 ? 0 :
+                mbid == 11 ? 0 :
+                mbid == 12 ? 1 :
+                mbid == 13 ? 1 :
+                mbid == 14 ? 1 :
+                mbid == 15 ? 1 : 0;
+
+assign wenable4 = mok ? 0 :          // Window is 13,14,15,0,1,2,3,4
+                mbid == 0 ? 1 :
+                mbid == 1 ? 1 :
+                mbid == 2 ? 1 :
+                mbid == 3 ? 1 :
+                mbid == 4 ? 1 :
+                mbid == 5 ? 0 :
+                mbid == 6 ? 0 :
+                mbid == 7 ? 0 :
+                mbid == 8 ? 0 :
+                mbid == 9 ? 0 :
+                mbid == 10 ? 0 :
+                mbid == 11 ? 0 :
+                mbid == 12 ? 0 :
+                mbid == 13 ? 1 :
+                mbid == 14 ? 1 :
+                mbid == 15 ? 1 : 0;
+
+assign wenable5 = mok ? 0 :          // Window is 14,15,0,1,2,3,4,5
+                mbid == 0 ? 1 :
+                mbid == 1 ? 1 :
+                mbid == 2 ? 1 :
+                mbid == 3 ? 1 :
+                mbid == 4 ? 1 :
+                mbid == 5 ? 1 :
+                mbid == 6 ? 0 :
+                mbid == 7 ? 0 :
+                mbid == 8 ? 0 :
+                mbid == 9 ? 0 :
+                mbid == 10 ? 0 :
+                mbid == 11 ? 0 :
+                mbid == 12 ? 0 :
+                mbid == 13 ? 0 :
+                mbid == 14 ? 1 :
+                mbid == 15 ? 1 : 0;
+
+assign wenable6 = mok ? 0 :          // Window is 15,0,1,2,3,4,5,6
+                mbid == 0 ? 1 :
+                mbid == 1 ? 1 :
+                mbid == 2 ? 1 :
+                mbid == 3 ? 1 :
+                mbid == 4 ? 1 :
+                mbid == 5 ? 1 :
+                mbid == 6 ? 1 :
+                mbid == 7 ? 0 :
+                mbid == 8 ? 0 :
+                mbid == 9 ? 0 :
+                mbid == 10 ? 0 :
+                mbid == 11 ? 0 :
+                mbid == 12 ? 0 :
+                mbid == 13 ? 0 :
+                mbid == 14 ? 0 :
+                mbid == 15 ? 1 : 0;
+
+assign wenable7 = mok ? 0 :          // Window is 0,1,2,3,4,5,6,7
+                mbid == 0 ? 1 :
+                mbid == 1 ? 1 :
+                mbid == 2 ? 1 :
+                mbid == 3 ? 1 :
+                mbid == 4 ? 1 :
+                mbid == 5 ? 1 :
+                mbid == 6 ? 1 :
+                mbid == 7 ? 1 :
+                mbid == 8 ? 0 :
+                mbid == 9 ? 0 :
+                mbid == 10 ? 0 :
+                mbid == 11 ? 0 :
+                mbid == 12 ? 0 :
+                mbid == 13 ? 0 :
+                mbid == 14 ? 0 :
+                mbid == 15 ? 0 : 0;
+
+assign wenable8 = mok ? 0 :          // Window is 1,2,3,4,5,6,7,8
+                mbid == 0 ? 0 :
+                mbid == 1 ? 1 :
+                mbid == 2 ? 1 :
+                mbid == 3 ? 1 :
+                mbid == 4 ? 1 :
+                mbid == 5 ? 1 :
+                mbid == 6 ? 1 :
+                mbid == 7 ? 1 :
+                mbid == 8 ? 1 :
+                mbid == 9 ? 0 :
+                mbid == 10 ? 0 :
+                mbid == 11 ? 0 :
+                mbid == 12 ? 0 :
+                mbid == 13 ? 0 :
+                mbid == 14 ? 0 :
+                mbid == 15 ? 0 : 0;
+
+assign wenable9 = mok ? 0 :          // Window is 2,3,4,5,6,7,8,9
+                mbid == 0 ? 0 :
+                mbid == 1 ? 0 :
+                mbid == 2 ? 1 :
+                mbid == 3 ? 1 :
+                mbid == 4 ? 1 :
+                mbid == 5 ? 1 :
+                mbid == 6 ? 1 :
+                mbid == 7 ? 1 :
+                mbid == 8 ? 1 :
+                mbid == 9 ? 1 :
+                mbid == 10 ? 0 :
+                mbid == 11 ? 0 :
+                mbid == 12 ? 0 :
+                mbid == 13 ? 0 :
+                mbid == 14 ? 0 :
+                mbid == 15 ? 0 : 0;
+
+assign wenable10 = mok ? 0 :         // Window is 3,4,5,6,7,8,9,10
+                mbid == 0 ? 0 :
+                mbid == 1 ? 0 :
+                mbid == 2 ? 0 :
+                mbid == 3 ? 1 :
+                mbid == 4 ? 1 :
+                mbid == 5 ? 1 :
+                mbid == 6 ? 1 :
+                mbid == 7 ? 1 :
+                mbid == 8 ? 1 :
+                mbid == 9 ? 1 :
+                mbid == 10 ? 1 :
+                mbid == 11 ? 0 :
+                mbid == 12 ? 0 :
+                mbid == 13 ? 0 :
+                mbid == 14 ? 0 :
+                mbid == 15 ? 0 : 0;
+
+assign wenable11 = mok ? 0 :         // Window is 4,5,6,7,8,9,10,11
+                mbid == 0 ? 0 :
+                mbid == 1 ? 0 :
+                mbid == 2 ? 0 :
+                mbid == 3 ? 0 :
+                mbid == 4 ? 1 :
+                mbid == 5 ? 1 :
+                mbid == 6 ? 1 :
+                mbid == 7 ? 1 :
+                mbid == 8 ? 1 :
+                mbid == 9 ? 1 :
+                mbid == 10 ? 1 :
+                mbid == 11 ? 1 :
+                mbid == 12 ? 0 :
+                mbid == 13 ? 0 :
+                mbid == 14 ? 0 :
+                mbid == 15 ? 0 : 0;
+
+assign wenable12 = mok ? 0 :         // Window is 5,6,7,8,9,10,11,12
+                mbid == 0 ? 0 :
+                mbid == 1 ? 0 :
+                mbid == 2 ? 0 :
+                mbid == 3 ? 0 :
+                mbid == 4 ? 0 :
+                mbid == 5 ? 1 :
+                mbid == 6 ? 1 :
+                mbid == 7 ? 1 :
+                mbid == 8 ? 1 :
+                mbid == 9 ? 1 :
+                mbid == 10 ? 1 :
+                mbid == 11 ? 1 :
+                mbid == 12 ? 1 :
+                mbid == 13 ? 0 :
+                mbid == 14 ? 0 :
+                mbid == 15 ? 0 : 0;
+
+assign wenable13 = mok ? 0 :         // Window is 6,7,8,9,10,11,12,13
+                mbid == 0 ? 0 :
+                mbid == 1 ? 0 :
+                mbid == 2 ? 0 :
+                mbid == 3 ? 0 :
+                mbid == 4 ? 0 :
+                mbid == 5 ? 0 :
+                mbid == 6 ? 1 :
+                mbid == 7 ? 1 :
+                mbid == 8 ? 1 :
+                mbid == 9 ? 1 :
+                mbid == 10 ? 1 :
+                mbid == 11 ? 1 :
+                mbid == 12 ? 1 :
+                mbid == 13 ? 1 :
+                mbid == 14 ? 0 :
+                mbid == 15 ? 0 : 0;
+
+assign wenable14 = mok ? 0 :         // Window is 7,8,9,10,11,12,13,14
+                mbid == 0 ? 0 :
+                mbid == 1 ? 0 :
+                mbid == 2 ? 0 :
+                mbid == 3 ? 0 :
+                mbid == 4 ? 0 :
+                mbid == 5 ? 0 :
+                mbid == 6 ? 0 :
+                mbid == 7 ? 1 :
+                mbid == 8 ? 1 :
+                mbid == 9 ? 1 :
+                mbid == 10 ? 1 :
+                mbid == 11 ? 1 :
+                mbid == 12 ? 1 :
+                mbid == 13 ? 1 :
+                mbid == 14 ? 1 :
+                mbid == 15 ? 0 : 0;
+
+assign wenable15 = mok ? 0 :         // Window is 8,9,10,11,12,13,14,15
+                mbid == 0 ? 0 :
+                mbid == 1 ? 0 :
+                mbid == 2 ? 0 :
+                mbid == 3 ? 0 :
+                mbid == 4 ? 0 :
+                mbid == 5 ? 0 :
+                mbid == 6 ? 0 :
+                mbid == 7 ? 0 :
+                mbid == 8 ? 1 :
+                mbid == 9 ? 1 :
+                mbid == 10 ? 1 :
+                mbid == 11 ? 1 :
+                mbid == 12 ? 1 :
+                mbid == 13 ? 1 :
+                mbid == 14 ? 1 :
+                mbid == 15 ? 1 : 0;
 
 
 
