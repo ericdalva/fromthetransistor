@@ -21,9 +21,9 @@ module read_only_ram (address, instr)
 endmodule
 
 module banked_memory (clk, iaddr, maddr, mok, iok, instr, wenable, renable, wvalue, rvalue)
-    parameter word_size = 8; //1 byte
+    parameter word_size = 8;    // 1 byte
     parameter word_count = 512;
-    parameter address_size = 9; //log2 word count
+    parameter address_size = 9; // log2 word count
     parameter mem_size = 8192;
     
     input clk;
@@ -35,83 +35,68 @@ module banked_memory (clk, iaddr, maddr, mok, iok, instr, wenable, renable, wval
     output [63:0] rvalue;
     output iok, mok;
 
-    //out computer has a memory space of bytes. we want a memory circuit that
-    //can access 8 or 10 bytes at a time. way we do it is that we have banks
-    // that each return a byte at a time. then we wrap our mem space through the 
-    // banks so that byte 1 is in bank 1 byte 2 bank2 and we do it mod 16 so
-    // the last bits of the mem addr tell us which bank it is in, do it sequential
-    // so first 60 bits tell us what byte in the bank to look fo
+    // Computer has a memory space of bytes. We want a memory circuit that
+    // can access 8 or 10 bytes at a time. We do it using banks that each 
+    // return a byte at a time. Then we wrap our mem space through the banks
+    // so that byte 1 is in bank 1, byte 2 in bank 2, etc. mod 16.
+    // Last bits of mem addr tell us which bank, first 60 bits tell us byte in bank.
     
-    //instruction bytes
+    // Instruction bytes
     wire [7:0] ib0, ib1, ib2, ib3, ib4, ib5, ib6, ib7, ib8, ib9;
-    // data bytes
-    wire [7:0] db0, db1, db2, db3, db4, db5, db6, db7; 
+    // Data bytes
+    wire [7:0] db0, db1, db2, db3, db4, db5, db6, db7;
 
-    wire [3:0] ibid = iaddr[3:0]; //instruction bank id
+    wire [3:0] ibid = iaddr[3:0];    // Instruction bank id
     wire [59:0] iindex = iaddr[63:4];
-    wire [59:0] iindexp1 = iindex +1;
+    wire [59:0] iindexp1 = iindex + 1;
 
-    wire [3:0] mbid = maddr[3:0]; //memory bank id
+    wire [3:0] mbid = maddr[3:0];    // Memory bank id  
     wire [59:0] mindex = maddr[63:4];
-    wire [59:0] mindexp1 = mindex +1;
+    wire [59:0] mindexp1 = mindex + 1;
 
+    // Bank address wires
+    wire [address_size-1:0] iaddr0, maddr0;
+    wire [address_size-1:0] iaddr1, maddr1;
+    wire [address_size-1:0] iaddr2, maddr2;
+    wire [address_size-1:0] iaddr3, maddr3;
+    wire [address_size-1:0] iaddr4, maddr4;
+    wire [address_size-1:0] iaddr5, maddr5;
+    wire [address_size-1:0] iaddr6, maddr6;
+    wire [address_size-1:0] iaddr7, maddr7;
+    wire [address_size-1:0] iaddr8, maddr8;
+    wire [address_size-1:0] iaddr9, maddr9;
+    wire [address_size-1:0] iaddr10, maddr10;
+    wire [address_size-1:0] iaddr11, maddr11;
+    wire [address_size-1:0] iaddr12, maddr12;
+    wire [address_size-1:0] iaddr13, maddr13;
+    wire [address_size-1:0] iaddr14, maddr14;
+    wire [address_size-1:0] iaddr15, maddr15;
 
-    
+    // Bank data wires
+    wire [word_size-1:0] wval0, mval0, ival0;
+    wire [word_size-1:0] wval1, mval1, ival1;
+    wire [word_size-1:0] wval2, mval2, ival2;
+    wire [word_size-1:0] wval3, mval3, ival3;
+    wire [word_size-1:0] wval4, mval4, ival4;
+    wire [word_size-1:0] wval5, mval5, ival5;
+    wire [word_size-1:0] wval6, mval6, ival6;
+    wire [word_size-1:0] wval7, mval7, ival7;
+    wire [word_size-1:0] wval8, mval8, ival8;
+    wire [word_size-1:0] wval9, mval9, ival9;
+    wire [word_size-1:0] wval10, mval10, ival10;
+    wire [word_size-1:0] wval11, mval11, ival11;
+    wire [word_size-1:0] wval12, mval12, ival12;
+    wire [word_size-1:0] wval13, mval13, ival13;
+    wire [word_size-1:0] wval14, mval14, ival14;
+    wire [word_size-1:0] wval15, mval15, ival15;
 
+    // Write enable wires
+    wire wenable0, wenable1, wenable2, wenable3;
+    wire wenable4, wenable5, wenable6, wenable7;
+    wire wenable8, wenable9, wenable10, wenable11;
+    wire wenable12, wenable13, wenable14, wenable15;
 
-
-    //wires and bank hookups
-    wire [address_size -1:0] iaddr0, maddr0;
-    wire [address_size -1:0] iaddr1, maddr1;
-    wire [address_size -1:0] iaddr2, maddr2;
-    wire [address_size -1:0] iaddr3, maddr3;
-    wire [address_size -1:0] iaddr4, maddr4;
-    wire [address_size -1:0] iaddr5, maddr5;
-    wire [address_size -1:0] iaddr6, maddr6;
-    wire [address_size -1:0] iaddr7, maddr7;
-    wire [address_size -1:0] iaddr8, maddr8;
-    wire [address_size -1:0] iaddr9, maddr9;
-    wire [address_size -1:0] iaddr10, maddr10;
-    wire [address_size -1:0] iaddr11, maddr11;
-    wire [address_size -1:0] iaddr12, maddr12;
-    wire [address_size -1:0] iaddr13, maddr13;
-    wire [address_size -1:0] iaddr14, maddr14;
-    wire [address_size -1:0] iaddr15, maddr15;
-
-    wire [word_size -1:0] wval0, mval0, ival0;
-    wire [word_size -1:0] wval1, mval1, ival1;
-    wire [word_size -1:0] wval2, mval2, ival2;
-    wire [word_size -1:0] wval3, mval3, ival3;
-    wire [word_size -1:0] wval4, mval4, ival4;
-    wire [word_size -1:0] wval5, mval5, ival5;
-    wire [word_size -1:0] wval6, mval6, ival6;
-    wire [word_size -1:0] wval7, mval7, ival7;
-    wire [word_size -1:0] wval8, mval8, ival8;
-    wire [word_size -1:0] wval9, mval9, ival9;
-    wire [word_size -1:0] wval10, mval10, ival10;
-    wire [word_size -1:0] wval11, mval11, ival11;
-    wire [word_size -1:0] wval12, mval12, ival12;
-    wire [word_size -1:0] wval13, mval13, ival13;
-    wire [word_size -1:0] wval14, mval14, ival14;
-    wire [word_size -1:0] wval15, mval15, ival15;
-
-    wire wenable0;
-    wire wenable1;
-    wire wenable2;
-    wire wenable3;
-    wire wenable4;
-    wire wenable5;
-    wire wenable6;
-    wire wenable7;
-    wire wenable8;
-    wire wenable9;
-    wire wenable10;
-    wire wenable11;
-    wire wenable12;
-    wire wenable13;
-    wire wenable14;
-    wire wenable15;
-
+    // Instantiate memory banks
     bank bank0(clk, iaddr0, maddr0, wenable0, wval0, ival0, mval0);
     bank bank1(clk, iaddr1, maddr1, wenable1, wval1, ival1, mval1);
     bank bank2(clk, iaddr2, maddr2, wenable2, wval2, ival2, mval2);
@@ -129,10 +114,8 @@ module banked_memory (clk, iaddr, maddr, mok, iok, instr, wenable, renable, wval
     bank bank14(clk, iaddr14, maddr14, wenable14, wval14, ival14, mval14);
     bank bank15(clk, iaddr15, maddr15, wenable15, wval15, ival15, mval15);
 
-
-    //Determine instruction addr for the banks
-
-    assign iaddr0 = ibid >= 7 ? iindexp1 : iindex; //wraps to plus one 
+    // Determine instruction addresses for banks
+    assign iaddr0 = ibid >= 7 ? iindexp1 : iindex;
     assign iaddr1 = ibid >= 8 ? iindexp1 : iindex;
     assign iaddr2 = ibid >= 9 ? iindexp1 : iindex;
     assign iaddr3 = ibid >= 10 ? iindexp1 : iindex;
@@ -149,20 +132,24 @@ module banked_memory (clk, iaddr, maddr, mok, iok, instr, wenable, renable, wval
     assign iaddr14 = iindex;
     assign iaddr15 = iindex;
 
-    //Determine mem addr for the banks
-    assign maddr0 = ibid >= 9 ? mindexp1 : mindex;
-    assign maddr1 = ibid >= 10 ? mindexp1 : mindex;
-    assign maddr2 = ibid >= 11 ? mindexp1 : mindex;
-    assign maddr3 = ibid >= 12 ? mindexp1 : mindex;
-    assign maddr4 = ibid >= 13 ? mindexp1 : mindex;
-    assign maddr5 = ibid >= 14 ? mindexp1 : mindex;
-    assign maddr6 = ibid >= 15 ? mindexp1 : mindex;
+    // Determine memory addresses for banks
+    assign maddr0 = mbid >= 9 ? mindexp1 : mindex;
+    assign maddr1 = mbid >= 10 ? mindexp1 : mindex;
+    assign maddr2 = mbid >= 11 ? mindexp1 : mindex;
+    assign maddr3 = mbid >= 12 ? mindexp1 : mindex;
+    assign maddr4 = mbid >= 13 ? mindexp1 : mindex;
+    assign maddr5 = mbid >= 14 ? mindexp1 : mindex;
+    assign maddr6 = mbid >= 15 ? mindexp1 : mindex;
     assign maddr7 = mindex;
     assign maddr8 = mindex;
     assign maddr9 = mindex;
     assign maddr10 = mindex;
     assign maddr11 = mindex;
     assign maddr12 = mindex;
+    assign maddr13 = mindex;
+    assign maddr14 = mindex;
+    assign maddr15 = mindex;
+
 
     // getting bytes of instruction 
     assign iok = iaddr + 9  <= mem_size;
@@ -360,7 +347,7 @@ module banked_memory (clk, iaddr, maddr, mok, iok, instr, wenable, renable, wval
                 ibid == 15 ? ival8 :
                 0;
 
-        assign db0 = mok ? 0 :
+        assign db0 = !mok ? 0 :
                 mbid == 0 ? mval0 :
                 mbid == 1 ? mval1 :
                 mbid == 2 ? mval2 :
@@ -379,7 +366,7 @@ module banked_memory (clk, iaddr, maddr, mok, iok, instr, wenable, renable, wval
                 mbid == 15 ? mval15 :
                 0;
 
-        assign db1 = mok ? 0 :
+        assign db1 = !mok ? 0 :
                 mbid == 0 ? mval1 :
                 mbid == 1 ? mval2 :
                 mbid == 2 ? mval3 :
@@ -398,7 +385,7 @@ module banked_memory (clk, iaddr, maddr, mok, iok, instr, wenable, renable, wval
                 mbid == 15 ? mval0 :
                 0;
 
-        assign db2 = mok ? 0 :
+        assign db2 = !mok ? 0 :
                 mbid == 0 ? mval2 :
                 mbid == 1 ? mval3 :
                 mbid == 2 ? mval4 :
@@ -417,7 +404,7 @@ module banked_memory (clk, iaddr, maddr, mok, iok, instr, wenable, renable, wval
                 mbid == 15 ? mval1 :
                 0;
 
-        assign db3 = mok ? 0 :
+        assign db3 = !mok ? 0 :
                 mbid == 0 ? mval3 :
                 mbid == 1 ? mval4 :
                 mbid == 2 ? mval5 :
@@ -436,7 +423,7 @@ module banked_memory (clk, iaddr, maddr, mok, iok, instr, wenable, renable, wval
                 mbid == 15 ? mval2 :
                 0;
 
-        assign db4 = mok ? 0 :
+        assign db4 = !mok ? 0 :
                 mbid == 0 ? mval4 :
                 mbid == 1 ? mval5 :
                 mbid == 2 ? mval6 :
@@ -455,7 +442,7 @@ module banked_memory (clk, iaddr, maddr, mok, iok, instr, wenable, renable, wval
                 mbid == 15 ? mval3 :
                 0;
 
-        assign db5 = mok ? 0 :
+        assign db5 = !mok ? 0 :
                 mbid == 0 ? mval5 :
                 mbid == 1 ? mval6 :
                 mbid == 2 ? mval7 :
@@ -474,7 +461,7 @@ module banked_memory (clk, iaddr, maddr, mok, iok, instr, wenable, renable, wval
                 mbid == 15 ? mval4 :
                 0;
 
-        assign db6 = mok ? 0 :
+        assign db6 = !mok ? 0 :
                 mbid == 0 ? mval6 :
                 mbid == 1 ? mval7 :
                 mbid == 2 ? mval8 :
@@ -487,7 +474,29 @@ module banked_memory (clk, iaddr, maddr, mok, iok, instr, wenable, renable, wval
                 mbid == 9 ? mval15 :
                 mbid == 10 ? mval0 :
                 mbid == 11 ? mval1 :
-                mbid == 12 ? mval2
+                mbid == 12 ? mval2 :
+                mbid == 13 ? mval3 :
+                mbid == 14 ? mval4 :
+                mbid == 15 ? mval5 : 0;
+        
+        assign db7 = !mok ? 0 :
+                mbid == 0 ? mval7 :
+                mbid == 1 ? mval8 :
+                mbid == 2 ? mval9 :
+                mbid == 3 ? mval10 :
+                mbid == 4 ? mval11 :
+                mbid == 5 ? mval12 :
+                mbid == 6 ? mval13 :
+                mbid == 7 ? mval14 :
+                mbid == 8 ? mval15 :
+                mbid == 9 ? mval0 :
+                mbid == 10 ? mval1 :
+                mbid == 11 ? mval2 :
+                mbid == 12 ? mval3 :
+                mbid == 13 ? mval4 :
+                mbid == 14 ? mval5 :
+                mbid == 15 ? mval6 : 0;
+
 
         //finished reading
     assign instr = {ib0, ib1, ib2, ib3, ib4, ib5, ib6, ib7, ib8, ib9};
@@ -519,7 +528,7 @@ module banked_memory (clk, iaddr, maddr, mok, iok, instr, wenable, renable, wval
                     mbid == 11 ? wb5 :
                     mbid == 12 ? wb4 :
                     mbid  == 13 ? wb3 :
-                    mbid == 14 ? wb2 : wb1
+                    mbid == 14 ? wb2 : wb1;
     
     assign wval1  = mbid == 0 ? wb1 :
                     mbid == 1 ? wb0 :
@@ -535,7 +544,7 @@ module banked_memory (clk, iaddr, maddr, mok, iok, instr, wenable, renable, wval
                     mbid == 11 ? wb6 :
                     mbid == 12 ? wb5 :
                     mbid == 13 ? wb4 :
-                    mbid == 14 ? wb3 : wb2
+                    mbid == 14 ? wb3 : wb2;
     
     assign wval2 = mbid == 0 ? wb2 :
                 mbid == 1 ? wb1 :
@@ -633,7 +642,7 @@ module banked_memory (clk, iaddr, maddr, mok, iok, instr, wenable, renable, wval
                 mbid == 13 ? 0 :
                 mbid == 14 ? 0 : 0;
 
-assign wenable0 = mok ? 0 :          // Window is 9,10,11,12,13,14,15,0
+assign wenable0 = !mok ? 0 :          // Window is 9,10,11,12,13,14,15,0
                 mbid == 0 ? 1 :    
                 mbid == 1 ? 0 :
                 mbid == 2 ? 0 :
@@ -651,7 +660,7 @@ assign wenable0 = mok ? 0 :          // Window is 9,10,11,12,13,14,15,0
                 mbid == 14 ? 1 :
                 mbid == 15 ? 1 : 0;
 
-assign wenable1 = mok ? 0 :          // Window is 10,11,12,13,14,15,0,1
+assign wenable1 = !mok ? 0 :          // Window is 10,11,12,13,14,15,0,1
                 mbid == 0 ? 1 :
                 mbid == 1 ? 1 :
                 mbid == 2 ? 0 :
@@ -669,7 +678,7 @@ assign wenable1 = mok ? 0 :          // Window is 10,11,12,13,14,15,0,1
                 mbid == 14 ? 1 :
                 mbid == 15 ? 1 : 0;
 
-assign wenable2 = mok ? 0 :          // Window is 11,12,13,14,15,0,1,2
+assign wenable2 = !mok ? 0 :          // Window is 11,12,13,14,15,0,1,2
                 mbid == 0 ? 1 :
                 mbid == 1 ? 1 :
                 mbid == 2 ? 1 :
@@ -687,7 +696,7 @@ assign wenable2 = mok ? 0 :          // Window is 11,12,13,14,15,0,1,2
                 mbid == 14 ? 1 :
                 mbid == 15 ? 1 : 0;
 
-assign wenable3 = mok ? 0 :          // Window is 12,13,14,15,0,1,2,3
+assign wenable3 = !mok ? 0 :          // Window is 12,13,14,15,0,1,2,3
                 mbid == 0 ? 1 :
                 mbid == 1 ? 1 :
                 mbid == 2 ? 1 :
@@ -705,7 +714,7 @@ assign wenable3 = mok ? 0 :          // Window is 12,13,14,15,0,1,2,3
                 mbid == 14 ? 1 :
                 mbid == 15 ? 1 : 0;
 
-assign wenable4 = mok ? 0 :          // Window is 13,14,15,0,1,2,3,4
+assign wenable4 = !mok ? 0 :          // Window is 13,14,15,0,1,2,3,4
                 mbid == 0 ? 1 :
                 mbid == 1 ? 1 :
                 mbid == 2 ? 1 :
@@ -723,7 +732,7 @@ assign wenable4 = mok ? 0 :          // Window is 13,14,15,0,1,2,3,4
                 mbid == 14 ? 1 :
                 mbid == 15 ? 1 : 0;
 
-assign wenable5 = mok ? 0 :          // Window is 14,15,0,1,2,3,4,5
+assign wenable5 = !mok ? 0 :          // Window is 14,15,0,1,2,3,4,5
                 mbid == 0 ? 1 :
                 mbid == 1 ? 1 :
                 mbid == 2 ? 1 :
@@ -741,7 +750,7 @@ assign wenable5 = mok ? 0 :          // Window is 14,15,0,1,2,3,4,5
                 mbid == 14 ? 1 :
                 mbid == 15 ? 1 : 0;
 
-assign wenable6 = mok ? 0 :          // Window is 15,0,1,2,3,4,5,6
+assign wenable6 = !mok ? 0 :          // Window is 15,0,1,2,3,4,5,6
                 mbid == 0 ? 1 :
                 mbid == 1 ? 1 :
                 mbid == 2 ? 1 :
@@ -759,7 +768,7 @@ assign wenable6 = mok ? 0 :          // Window is 15,0,1,2,3,4,5,6
                 mbid == 14 ? 0 :
                 mbid == 15 ? 1 : 0;
 
-assign wenable7 = mok ? 0 :          // Window is 0,1,2,3,4,5,6,7
+assign wenable7 = !mok ? 0 :          // Window is 0,1,2,3,4,5,6,7
                 mbid == 0 ? 1 :
                 mbid == 1 ? 1 :
                 mbid == 2 ? 1 :
@@ -777,7 +786,7 @@ assign wenable7 = mok ? 0 :          // Window is 0,1,2,3,4,5,6,7
                 mbid == 14 ? 0 :
                 mbid == 15 ? 0 : 0;
 
-assign wenable8 = mok ? 0 :          // Window is 1,2,3,4,5,6,7,8
+assign wenable8 = !mok ? 0 :          // Window is 1,2,3,4,5,6,7,8
                 mbid == 0 ? 0 :
                 mbid == 1 ? 1 :
                 mbid == 2 ? 1 :
@@ -795,7 +804,7 @@ assign wenable8 = mok ? 0 :          // Window is 1,2,3,4,5,6,7,8
                 mbid == 14 ? 0 :
                 mbid == 15 ? 0 : 0;
 
-assign wenable9 = mok ? 0 :          // Window is 2,3,4,5,6,7,8,9
+assign wenable9 = !mok ? 0 :          // Window is 2,3,4,5,6,7,8,9
                 mbid == 0 ? 0 :
                 mbid == 1 ? 0 :
                 mbid == 2 ? 1 :
@@ -813,7 +822,7 @@ assign wenable9 = mok ? 0 :          // Window is 2,3,4,5,6,7,8,9
                 mbid == 14 ? 0 :
                 mbid == 15 ? 0 : 0;
 
-assign wenable10 = mok ? 0 :         // Window is 3,4,5,6,7,8,9,10
+assign wenable10 = !mok ? 0 :         // Window is 3,4,5,6,7,8,9,10
                 mbid == 0 ? 0 :
                 mbid == 1 ? 0 :
                 mbid == 2 ? 0 :
@@ -831,7 +840,7 @@ assign wenable10 = mok ? 0 :         // Window is 3,4,5,6,7,8,9,10
                 mbid == 14 ? 0 :
                 mbid == 15 ? 0 : 0;
 
-assign wenable11 = mok ? 0 :         // Window is 4,5,6,7,8,9,10,11
+assign wenable11 = !mok ? 0 :         // Window is 4,5,6,7,8,9,10,11
                 mbid == 0 ? 0 :
                 mbid == 1 ? 0 :
                 mbid == 2 ? 0 :
@@ -849,7 +858,7 @@ assign wenable11 = mok ? 0 :         // Window is 4,5,6,7,8,9,10,11
                 mbid == 14 ? 0 :
                 mbid == 15 ? 0 : 0;
 
-assign wenable12 = mok ? 0 :         // Window is 5,6,7,8,9,10,11,12
+assign wenable12 = !mok ? 0 :         // Window is 5,6,7,8,9,10,11,12
                 mbid == 0 ? 0 :
                 mbid == 1 ? 0 :
                 mbid == 2 ? 0 :
@@ -867,7 +876,7 @@ assign wenable12 = mok ? 0 :         // Window is 5,6,7,8,9,10,11,12
                 mbid == 14 ? 0 :
                 mbid == 15 ? 0 : 0;
 
-assign wenable13 = mok ? 0 :         // Window is 6,7,8,9,10,11,12,13
+assign wenable13 = !mok ? 0 :         // Window is 6,7,8,9,10,11,12,13
                 mbid == 0 ? 0 :
                 mbid == 1 ? 0 :
                 mbid == 2 ? 0 :
@@ -885,7 +894,7 @@ assign wenable13 = mok ? 0 :         // Window is 6,7,8,9,10,11,12,13
                 mbid == 14 ? 0 :
                 mbid == 15 ? 0 : 0;
 
-assign wenable14 = mok ? 0 :         // Window is 7,8,9,10,11,12,13,14
+assign wenable14 = !mok ? 0 :         // Window is 7,8,9,10,11,12,13,14
                 mbid == 0 ? 0 :
                 mbid == 1 ? 0 :
                 mbid == 2 ? 0 :
@@ -903,7 +912,7 @@ assign wenable14 = mok ? 0 :         // Window is 7,8,9,10,11,12,13,14
                 mbid == 14 ? 1 :
                 mbid == 15 ? 0 : 0;
 
-assign wenable15 = mok ? 0 :         // Window is 8,9,10,11,12,13,14,15
+assign wenable15 = !mok ? 0 :         // Window is 8,9,10,11,12,13,14,15
                 mbid == 0 ? 0 :
                 mbid == 1 ? 0 :
                 mbid == 2 ? 0 :
@@ -921,6 +930,7 @@ assign wenable15 = mok ? 0 :         // Window is 8,9,10,11,12,13,14,15
                 mbid == 14 ? 1 :
                 mbid == 15 ? 1 : 0;
 
+endmodule
 
 
 
