@@ -1,4 +1,4 @@
-module read_only_ram (address, instr)
+module read_only_ram (address, instr);
    input [9:0] address; // address is the position of the byte 
    output [79:0] instr; // always return 10 bytes
 
@@ -20,11 +20,11 @@ module read_only_ram (address, instr)
 
 endmodule
 
-module banked_memory (clk, iaddr, maddr, mok, iok, instr, wenable, renable, wvalue, rvalue)
+module banked_memory (clk, iaddr, maddr, mok, iok, instr, wenable, renable, wvalue, rvalue);
     parameter word_size = 8;    // 1 byte
     parameter word_count = 512;
     parameter address_size = 9; // log2 word count
-    parameter mem_size = 8192;
+    parameter mem_size = 8192; //in words
     
     input clk;
     input [63:0] iaddr, maddr;
@@ -34,6 +34,10 @@ module banked_memory (clk, iaddr, maddr, mok, iok, instr, wenable, renable, wval
     output [79:0] instr;
     output [63:0] rvalue;
     output iok, mok;
+
+    wire iok, mok;
+    assign iok = (iaddr >= 0 & iaddr <= mem_size - 10);
+    assign mok = (maddr >= 0 & maddr <= mem_size - 8);
 
     // Computer has a memory space of bytes. We want a memory circuit that
     // can access 8 or 10 bytes at a time. We do it using banks that each 
@@ -97,22 +101,22 @@ module banked_memory (clk, iaddr, maddr, mok, iok, instr, wenable, renable, wval
     wire wenable12, wenable13, wenable14, wenable15;
 
     // Instantiate memory banks
-    bank bank0(clk, iaddr0, maddr0, wenable0, wval0, ival0, mval0);
-    bank bank1(clk, iaddr1, maddr1, wenable1, wval1, ival1, mval1);
-    bank bank2(clk, iaddr2, maddr2, wenable2, wval2, ival2, mval2);
-    bank bank3(clk, iaddr3, maddr3, wenable3, wval3, ival3, mval3);
-    bank bank4(clk, iaddr4, maddr4, wenable4, wval4, ival4, mval4);
-    bank bank5(clk, iaddr5, maddr5, wenable5, wval5, ival5, mval5);
-    bank bank6(clk, iaddr6, maddr6, wenable6, wval6, ival6, mval6);
-    bank bank7(clk, iaddr7, maddr7, wenable7, wval7, ival7, mval7);
-    bank bank8(clk, iaddr8, maddr8, wenable8, wval8, ival8, mval8);
-    bank bank9(clk, iaddr9, maddr9, wenable9, wval9, ival9, mval9);
-    bank bank10(clk, iaddr10, maddr10, wenable10, wval10, ival10, mval10);
-    bank bank11(clk, iaddr11, maddr11, wenable11, wval11, ival11, mval11);
-    bank bank12(clk, iaddr12, maddr12, wenable12, wval12, ival12, mval12);
-    bank bank13(clk, iaddr13, maddr13, wenable13, wval13, ival13, mval13);
-    bank bank14(clk, iaddr14, maddr14, wenable14, wval14, ival14, mval14);
-    bank bank15(clk, iaddr15, maddr15, wenable15, wval15, ival15, mval15);
+    bank bank0(clk, iaddr0, maddr0, 0, wenable0, 0, wval0, ival0, mval0);
+    bank bank1(clk, iaddr1, maddr1, 0, wenable1, 0, wval1, ival1, mval1);
+    bank bank2(clk, iaddr2, maddr2, 0, wenable2, 0, wval2, ival2, mval2);
+    bank bank3(clk, iaddr3, maddr3, 0, wenable3, 0, wval3, ival3, mval3);
+    bank bank4(clk, iaddr4, maddr4, 0, wenable4, 0, wval4, ival4, mval4);
+    bank bank5(clk, iaddr5, maddr5, 0, wenable5, 0, wval5, ival5, mval5);
+    bank bank6(clk, iaddr6, maddr6, 0, wenable6, 0, wval6, ival6, mval6);
+    bank bank7(clk, iaddr7, maddr7, 0, wenable7, 0, wval7, ival7, mval7);
+    bank bank8(clk, iaddr8, maddr8, 0, wenable8, 0, wval8, ival8, mval8);
+    bank bank9(clk, iaddr9, maddr9, 0, wenable9, 0, wval9, ival9, mval9);
+    bank bank10(clk, iaddr10, maddr10, 0, wenable10, 0, wval10, ival10, mval10);
+    bank bank11(clk, iaddr11, maddr11, 0, wenable11, 0, wval11, ival11, mval11);
+    bank bank12(clk, iaddr12, maddr12, 0, wenable12, 0, wval12, ival12, mval12);
+    bank bank13(clk, iaddr13, maddr13, 0, wenable13, 0, wval13, ival13, mval13);
+    bank bank14(clk, iaddr14, maddr14, 0, wenable14, 0, wval14, ival14, mval14);
+    bank bank15(clk, iaddr15, maddr15, 0, wenable15, 0, wval15, ival15, mval15);
 
     // Determine instruction addresses for banks
     assign iaddr0 = ibid >= 7 ? iindexp1 : iindex;
@@ -150,10 +154,9 @@ module banked_memory (clk, iaddr, maddr, mok, iok, instr, wenable, renable, wval
     assign maddr14 = mindex;
     assign maddr15 = mindex;
 
-
-    // getting bytes of instruction 
-    assign iok = iaddr + 9  <= mem_size;
-    assign mok = maddr + 7 <= mem_size;
+    initial begin
+    $monitor("mok = %b, wvalue = %h, maddr = %h, wenable9 = %b, wval9 = %h, wenable = %b, mval6 = %h, mval9 = %h, mbid = %h", iok, wvalue, maddr, wenable9, wval9, wenable, mval6, mval9, mbid);
+        end
     // this part is gross! I am sure there is a better way but I also 
     // spent more time thinking about it then it took to actually just implement it
 
@@ -641,8 +644,136 @@ module banked_memory (clk, iaddr, maddr, mok, iok, instr, wenable, renable, wval
                 mbid == 12 ? 0 :
                 mbid == 13 ? 0 :
                 mbid == 14 ? 0 : 0;
+        
+        assign wval8 = mbid == 0 ? 0 :
+                mbid == 1 ? wb7 :
+                mbid == 2 ? wb6 :
+                mbid == 3 ? wb5 :
+                mbid == 4 ? wb4 :
+                mbid == 5 ? wb3 :
+                mbid == 6 ? wb2 :
+                mbid == 7 ? wb1 :
+                mbid == 8 ? wb0 :
+                mbid == 9 ? 0 :
+                mbid == 10 ? 0 :
+                mbid == 11 ? 0 :
+                mbid == 12 ? 0 :
+                mbid == 13 ? 0 :
+                mbid == 14 ? 0 : 0;
 
-assign wenable0 = !mok ? 0 :          // Window is 9,10,11,12,13,14,15,0
+        assign wval9 = mbid == 0 ? 0 :
+                mbid == 1 ? 0 :
+                mbid == 2 ? wb7 :
+                mbid == 3 ? wb6 :
+                mbid == 4 ? wb5 :
+                mbid == 5 ? wb4 :
+                mbid == 6 ? wb3 :
+                mbid == 7 ? wb2 :
+                mbid == 8 ? wb1 :
+                mbid == 9 ? wb0 :
+                mbid == 10 ? 0 :
+                mbid == 11 ? 0 :
+                mbid == 12 ? 0 :
+                mbid == 13 ? 0 :
+                mbid == 14 ? 0 : 0;
+
+        assign wval10 = mbid == 0 ? 0 :
+                mbid == 1 ? 0 :
+                mbid == 2 ? 0 :
+                mbid == 3 ? wb7 :
+                mbid == 4 ? wb6 :
+                mbid == 5 ? wb5 :
+                mbid == 6 ? wb4 :
+                mbid == 7 ? wb3 :
+                mbid == 8 ? wb2 :
+                mbid == 9 ? wb1 :
+                mbid == 10 ? wb0 :
+                mbid == 11 ? 0 :
+                mbid == 12 ? 0 :
+                mbid == 13 ? 0 :
+                mbid == 14 ? 0 : 0;
+
+        assign wval11 = mbid == 0 ? 0 :
+                mbid == 1 ? 0 :
+                mbid == 2 ? 0 :
+                mbid == 3 ? 0 :
+                mbid == 4 ? wb7 :
+                mbid == 5 ? wb6 :
+                mbid == 6 ? wb5 :
+                mbid == 7 ? wb4 :
+                mbid == 8 ? wb3 :
+                mbid == 9 ? wb2 :
+                mbid == 10 ? wb1 :
+                mbid == 11 ? wb0 :
+                mbid == 12 ? 0 :
+                mbid == 13 ? 0 :
+                mbid == 14 ? 0 : 0;
+
+        assign wval12 = mbid == 0 ? 0 :
+                mbid == 1 ? 0 :
+                mbid == 2 ? 0 :
+                mbid == 3 ? 0 :
+                mbid == 4 ? 0 :
+                mbid == 5 ? wb7 :
+                mbid == 6 ? wb6 :
+                mbid == 7 ? wb5 :
+                mbid == 8 ? wb4 :
+                mbid == 9 ? wb3 :
+                mbid == 10 ? wb2 :
+                mbid == 11 ? wb1 :
+                mbid == 12 ? wb0 :
+                mbid == 13 ? 0 :
+                mbid == 14 ? 0 : 0;
+
+        assign wval13 = mbid == 0 ? 0 :
+                mbid == 1 ? 0 :
+                mbid == 2 ? 0 :
+                mbid == 3 ? 0 :
+                mbid == 4 ? 0 :
+                mbid == 5 ? 0 :
+                mbid == 6 ? wb7 :
+                mbid == 7 ? wb6 :
+                mbid == 8 ? wb5 :
+                mbid == 9 ? wb4 :
+                mbid == 10 ? wb3 :
+                mbid == 11 ? wb2 :
+                mbid == 12 ? wb1 :
+                mbid == 13 ? wb0 :
+                mbid == 14 ? 0 : 0;
+
+        assign wval14 = mbid == 0 ? 0 :
+                mbid == 1 ? 0 :
+                mbid == 2 ? 0 :
+                mbid == 3 ? 0 :
+                mbid == 4 ? 0 :
+                mbid == 5 ? 0 :
+                mbid == 6 ? 0 :
+                mbid == 7 ? wb7 :
+                mbid == 8 ? wb6 :
+                mbid == 9 ? wb5 :
+                mbid == 10 ? wb4 :
+                mbid == 11 ? wb3 :
+                mbid == 12 ? wb2 :
+                mbid == 13 ? wb1 :
+                mbid == 14 ? wb0 : 0;
+
+        assign wval15 = mbid == 0 ? 0 :
+                mbid == 1 ? 0 :
+                mbid == 2 ? 0 :
+                mbid == 3 ? 0 :
+                mbid == 4 ? 0 :
+                mbid == 5 ? 0 :
+                mbid == 6 ? 0 :
+                mbid == 7 ? 0 :
+                mbid == 8 ? wb7 :
+                mbid == 9 ? wb6 :
+                mbid == 10 ? wb5 :
+                mbid == 11 ? wb4 :
+                mbid == 12 ? wb3 :
+                mbid == 13 ? wb2 :
+                mbid == 14 ? wb1 : wb0;
+
+        assign wenable0 = (!mok | !wenable) ? 0 :          // Window is 9,10,11,12,13,14,15,0
                 mbid == 0 ? 1 :    
                 mbid == 1 ? 0 :
                 mbid == 2 ? 0 :
@@ -660,7 +791,7 @@ assign wenable0 = !mok ? 0 :          // Window is 9,10,11,12,13,14,15,0
                 mbid == 14 ? 1 :
                 mbid == 15 ? 1 : 0;
 
-assign wenable1 = !mok ? 0 :          // Window is 10,11,12,13,14,15,0,1
+        assign wenable1 = (!mok | !wenable) ? 0 :          // Window is 10,11,12,13,14,15,0,1
                 mbid == 0 ? 1 :
                 mbid == 1 ? 1 :
                 mbid == 2 ? 0 :
@@ -678,7 +809,7 @@ assign wenable1 = !mok ? 0 :          // Window is 10,11,12,13,14,15,0,1
                 mbid == 14 ? 1 :
                 mbid == 15 ? 1 : 0;
 
-assign wenable2 = !mok ? 0 :          // Window is 11,12,13,14,15,0,1,2
+        assign wenable2 = (!mok | !wenable) ? 0 :          // Window is 11,12,13,14,15,0,1,2
                 mbid == 0 ? 1 :
                 mbid == 1 ? 1 :
                 mbid == 2 ? 1 :
@@ -696,7 +827,7 @@ assign wenable2 = !mok ? 0 :          // Window is 11,12,13,14,15,0,1,2
                 mbid == 14 ? 1 :
                 mbid == 15 ? 1 : 0;
 
-assign wenable3 = !mok ? 0 :          // Window is 12,13,14,15,0,1,2,3
+        assign wenable3 = (!mok | !wenable) ? 0 :          // Window is 12,13,14,15,0,1,2,3
                 mbid == 0 ? 1 :
                 mbid == 1 ? 1 :
                 mbid == 2 ? 1 :
@@ -714,7 +845,7 @@ assign wenable3 = !mok ? 0 :          // Window is 12,13,14,15,0,1,2,3
                 mbid == 14 ? 1 :
                 mbid == 15 ? 1 : 0;
 
-assign wenable4 = !mok ? 0 :          // Window is 13,14,15,0,1,2,3,4
+        assign wenable4 = (!mok | !wenable) ? 0 :          // Window is 13,14,15,0,1,2,3,4
                 mbid == 0 ? 1 :
                 mbid == 1 ? 1 :
                 mbid == 2 ? 1 :
@@ -732,7 +863,7 @@ assign wenable4 = !mok ? 0 :          // Window is 13,14,15,0,1,2,3,4
                 mbid == 14 ? 1 :
                 mbid == 15 ? 1 : 0;
 
-assign wenable5 = !mok ? 0 :          // Window is 14,15,0,1,2,3,4,5
+        assign wenable5 = (!mok | !wenable) ? 0 :          // Window is 14,15,0,1,2,3,4,5
                 mbid == 0 ? 1 :
                 mbid == 1 ? 1 :
                 mbid == 2 ? 1 :
@@ -750,7 +881,7 @@ assign wenable5 = !mok ? 0 :          // Window is 14,15,0,1,2,3,4,5
                 mbid == 14 ? 1 :
                 mbid == 15 ? 1 : 0;
 
-assign wenable6 = !mok ? 0 :          // Window is 15,0,1,2,3,4,5,6
+        assign wenable6 = (!mok | !wenable) ? 0 :          // Window is 15,0,1,2,3,4,5,6
                 mbid == 0 ? 1 :
                 mbid == 1 ? 1 :
                 mbid == 2 ? 1 :
@@ -768,7 +899,7 @@ assign wenable6 = !mok ? 0 :          // Window is 15,0,1,2,3,4,5,6
                 mbid == 14 ? 0 :
                 mbid == 15 ? 1 : 0;
 
-assign wenable7 = !mok ? 0 :          // Window is 0,1,2,3,4,5,6,7
+        assign wenable7 = (!mok | !wenable) ? 0 :          // Window is 0,1,2,3,4,5,6,7
                 mbid == 0 ? 1 :
                 mbid == 1 ? 1 :
                 mbid == 2 ? 1 :
@@ -786,7 +917,7 @@ assign wenable7 = !mok ? 0 :          // Window is 0,1,2,3,4,5,6,7
                 mbid == 14 ? 0 :
                 mbid == 15 ? 0 : 0;
 
-assign wenable8 = !mok ? 0 :          // Window is 1,2,3,4,5,6,7,8
+        assign wenable8 = (!mok | !wenable) ? 0 :          // Window is 1,2,3,4,5,6,7,8
                 mbid == 0 ? 0 :
                 mbid == 1 ? 1 :
                 mbid == 2 ? 1 :
@@ -804,7 +935,7 @@ assign wenable8 = !mok ? 0 :          // Window is 1,2,3,4,5,6,7,8
                 mbid == 14 ? 0 :
                 mbid == 15 ? 0 : 0;
 
-assign wenable9 = !mok ? 0 :          // Window is 2,3,4,5,6,7,8,9
+        assign wenable9 = (!mok | !wenable) ? 0 :          // Window is 2,3,4,5,6,7,8,9
                 mbid == 0 ? 0 :
                 mbid == 1 ? 0 :
                 mbid == 2 ? 1 :
@@ -822,7 +953,7 @@ assign wenable9 = !mok ? 0 :          // Window is 2,3,4,5,6,7,8,9
                 mbid == 14 ? 0 :
                 mbid == 15 ? 0 : 0;
 
-assign wenable10 = !mok ? 0 :         // Window is 3,4,5,6,7,8,9,10
+        assign wenable10 = (!mok | !wenable)? 0 :         // Window is 3,4,5,6,7,8,9,10
                 mbid == 0 ? 0 :
                 mbid == 1 ? 0 :
                 mbid == 2 ? 0 :
@@ -840,7 +971,7 @@ assign wenable10 = !mok ? 0 :         // Window is 3,4,5,6,7,8,9,10
                 mbid == 14 ? 0 :
                 mbid == 15 ? 0 : 0;
 
-assign wenable11 = !mok ? 0 :         // Window is 4,5,6,7,8,9,10,11
+        assign wenable11 = (!mok | !wenable) ? 0 :         // Window is 4,5,6,7,8,9,10,11
                 mbid == 0 ? 0 :
                 mbid == 1 ? 0 :
                 mbid == 2 ? 0 :
@@ -858,7 +989,7 @@ assign wenable11 = !mok ? 0 :         // Window is 4,5,6,7,8,9,10,11
                 mbid == 14 ? 0 :
                 mbid == 15 ? 0 : 0;
 
-assign wenable12 = !mok ? 0 :         // Window is 5,6,7,8,9,10,11,12
+        assign wenable12 = (!mok | !wenable) ? 0 :         // Window is 5,6,7,8,9,10,11,12
                 mbid == 0 ? 0 :
                 mbid == 1 ? 0 :
                 mbid == 2 ? 0 :
@@ -876,7 +1007,7 @@ assign wenable12 = !mok ? 0 :         // Window is 5,6,7,8,9,10,11,12
                 mbid == 14 ? 0 :
                 mbid == 15 ? 0 : 0;
 
-assign wenable13 = !mok ? 0 :         // Window is 6,7,8,9,10,11,12,13
+        assign wenable13 = (!mok | !wenable) ? 0 :         // Window is 6,7,8,9,10,11,12,13
                 mbid == 0 ? 0 :
                 mbid == 1 ? 0 :
                 mbid == 2 ? 0 :
@@ -894,7 +1025,7 @@ assign wenable13 = !mok ? 0 :         // Window is 6,7,8,9,10,11,12,13
                 mbid == 14 ? 0 :
                 mbid == 15 ? 0 : 0;
 
-assign wenable14 = !mok ? 0 :         // Window is 7,8,9,10,11,12,13,14
+        assign wenable14 = (!mok | !wenable) ? 0 :         // Window is 7,8,9,10,11,12,13,14
                 mbid == 0 ? 0 :
                 mbid == 1 ? 0 :
                 mbid == 2 ? 0 :
@@ -912,7 +1043,7 @@ assign wenable14 = !mok ? 0 :         // Window is 7,8,9,10,11,12,13,14
                 mbid == 14 ? 1 :
                 mbid == 15 ? 0 : 0;
 
-assign wenable15 = !mok ? 0 :         // Window is 8,9,10,11,12,13,14,15
+        assign wenable15 = (!mok | !wenable) ? 0 :         // Window is 8,9,10,11,12,13,14,15
                 mbid == 0 ? 0 :
                 mbid == 1 ? 0 :
                 mbid == 2 ? 0 :
@@ -938,20 +1069,19 @@ endmodule
 //dual ported random access memory where we will use A as the instr port.
 //CS:APP says this works for simulation but real hardware does not normally
 // allow combinatorial reads.
-module bank (clk, addrA, addrB, wenableA, wenableB, wvalA, wvalB, valA, valB)
+module bank (clk, addrA, addrB, wenableA, wenableB, wvalA, wvalB, valA, valB);
     parameter word_size = 8; //1 byte
     parameter word_count = 512;
     parameter address_size = 9; //log2 word count
 
     input clk;
-    input wenableA wenableB;
+    input wenableA, wenableB;
     input [address_size - 1:0] addrA, addrB;
     input [word_size -1:0] wvalA, wvalB;
 
-    output [word_size - 1:0] mval, ival;
+    output [word_size - 1:0] valA, valB;
 
-    reg [word_size - 1:0] mem [word_count -1:0];
-
+    reg [word_size - 1: 0] mem [word_count - 1: 0];
     assign valA = mem[addrA]; //mux over 8bit regs
     assign valB = mem[addrB];
 
@@ -966,8 +1096,8 @@ endmodule
 
 
 
-module clked_register (clk, write_enable, update_val, output_val, reset, reset_val)
-    parameter reg_size = 64
+module clked_register (clk, write_enable, update_val, output_val, reset, reset_val);
+    parameter reg_size = 64;
 
     input clk;
     input write_enable;
@@ -990,7 +1120,7 @@ endmodule
 
 
 
-module splitter (instr, icode, ifunc)
+module splitter (instr, icode, ifunc);
     input wire [79:0] instr;
     output wire [3:0] icode, ifunc;
 
@@ -998,19 +1128,19 @@ module splitter (instr, icode, ifunc)
     assign ifunc = instr[75: 72];
 endmodule
 
-module align (instr, needs_regs, needs_valC, regA, regB, valC)
+module align (instr, needs_regs, regA, regB, valC);
     input [79:0] instr;
     input needs_regs;
-    output [3:0] regA;
-    output [3:0] regB;
+    output [71:68] regA;
+    output [67:64] regB;
     output [63:0] valC;
 
     assign regA = instr[71:68];
     assign regB = instr[67:64];
-    assign valC = needs_regs ? instr[71:8], instr[63:0];
+    assign valC = needs_regs ? instr[63:0]: instr[71:8] ;
 endmodule
 
-module new_PC_module (PC, needs_regs, needs_valC, new_PC)
+module new_PC_module (PC, needs_regs, needs_valC, new_PC);
     input [63:0] PC;
     input needs_regs, needs_valC;
     output [63:0] new_PC;            
@@ -1019,10 +1149,11 @@ module new_PC_module (PC, needs_regs, needs_valC, new_PC)
 
 endmodule
 
-module reg_file (srcA, srcB, valA, valB, destA, destB, dest_val_A, dest_val_B) //can out reg for debug if we want
+module reg_file (srcA, srcB, valA, valB, destA, destB, dest_val_A, dest_val_B, reset); //can out reg for debug if we want
     input [3:0] srcA, srcB, destA, destB;
     input [63:0] dest_val_A, dest_val_B;
-    output valA, valB;
+    input reset;
+    output [63:0]  valA, valB;
 
     // the way the reg works is four mux's two connect regs to out, two connect in to regs
     // pretty sure that writing them as hex is not a problem but not 100%
@@ -1095,22 +1226,22 @@ module reg_file (srcA, srcB, valA, valB, destA, destB, dest_val_A, dest_val_B) /
     wire [63:0] out15;
 
     // regs
-    clked_register reg0(clk, write_enable0, update_val0, out0, 0, 0);
-    clked_register reg1(clk, write_enable1, update_val1, out1, 0, 0);
-    clked_register reg2(clk, write_enable2, update_val2, out2, 0, 0);
-    clked_register reg3(clk, write_enable3, update_val3, out3, 0, 0);
-    clked_register reg4(clk, write_enable4, update_val4, out4, 0, 0);
-    clked_register reg5(clk, write_enable5, update_val5, out5, 0, 0);
-    clked_register reg6(clk, write_enable6, update_val6, out6, 0, 0);
-    clked_register reg7(clk, write_enable7, update_val7, out7, 0, 0);
-    clked_register reg8(clk, write_enable8, update_val8, out8, 0, 0);
-    clked_register reg9(clk, write_enable9, update_val9, out9, 0, 0);
-    clked_register reg10(clk, write_enable10, update_val10, out10, 0, 0);
-    clked_register reg11(clk, write_enable11, update_val11, out11, 0, 0);
-    clked_register reg12(clk, write_enable12, update_val12, out12, 0, 0);
-    clked_register reg13(clk, write_enable13, update_val13, out13, 0, 0);
-    clked_register reg14(clk, write_enable14, update_val14, out14, 0, 0);
-    clked_register reg15(clk, write_enable15, update_val15, out15, 0, 0);
+    clked_register reg0(clk, write_enable0, update_val0, out0, reset, 0);
+    clked_register reg1(clk, write_enable1, update_val1, out1, reset, 0);
+    clked_register reg2(clk, write_enable2, update_val2, out2, reset, 0);
+    clked_register reg3(clk, write_enable3, update_val3, out3, reset, 0);
+    clked_register reg4(clk, write_enable4, update_val4, out4, reset, 0);
+    clked_register reg5(clk, write_enable5, update_val5, out5, reset, 0);
+    clked_register reg6(clk, write_enable6, update_val6, out6, reset, 0);
+    clked_register reg7(clk, write_enable7, update_val7, out7, reset, 0);
+    clked_register reg8(clk, write_enable8, update_val8, out8, reset, 0);
+    clked_register reg9(clk, write_enable9, update_val9, out9, reset, 0);
+    clked_register reg10(clk, write_enable10, update_val10, out10, reset, 0);
+    clked_register reg11(clk, write_enable11, update_val11, out11, reset, 0);
+    clked_register reg12(clk, write_enable12, update_val12, out12, reset, 0);
+    clked_register reg13(clk, write_enable13, update_val13, out13, reset, 0);
+    clked_register reg14(clk, write_enable14, update_val14, out14, reset, 0);
+    clked_register reg15(clk, write_enable15, update_val15, out15, reset, 0);
 
 
     assign valA = srcA == REG0 ? out0 :
@@ -1183,7 +1314,7 @@ module reg_file (srcA, srcB, valA, valB, destA, destB, dest_val_A, dest_val_B) /
 endmodule
 
 
-module alu (valA, valB, valC, aluFUNC, CCodes, outVal)
+module alu (valA, valB, valC, aluFUNC, CCodes, outVal);
     input [63:0] valA;
     input [63:0] valB;
     input [63:0] valC;
@@ -1207,35 +1338,76 @@ module alu (valA, valB, valC, aluFUNC, CCodes, outVal)
     assign CCodes[2] = outVal == 0;
     assign CCodes[1] = outVal[63];
     assign CCodes[0] = aluFUNC == ADD ? ((valA[63] == valB[63]) & (valA[63] != outVal[63])) :
-                        aluFUNC == SUB ? ((~valA[63] == valb[63]) & (~valA[63] != outVal[63])) : 0;
+                        aluFUNC == SUB ? ((~valA[63] == valB[63]) & (~valA[63] != outVal[63])) : 0;
     
 
+endmodule
+
+module ConditionCodes (clk, CCodes, reset, currentCodes);
+   input [2:0] CCodes;
+   input clk, reset;
+   output [2:0] currentCodes;
+
+   reg [2:0] codes;
+
+   always @(posedge clk) begin
+        if (reset == 1)
+                codes <= 0;
+        else
+                codes <= CCodes;
+   end 
+   assign currentCodes = codes;
 endmodule
 
     
 
 
 
-module processor (clk)
+module processor (clk, mode, download_val, upload_val, download_address, upload_address, status);
+    parameter RUN_MODE = 0;
+    parameter DOWNLOAD_MODE = 1; //downloads a word to a mem address
+    parameter UPLOAD_MODE = 2; //returns a word from a mem address
+    parameter RESET_MODE = 3; //sets CC, regs, PC = 0, sends RESET status.
+    parameter STATUS_MODE = 4;
+
+    // status parameters 
+    parameter RESET = 0;
+
 
     //instruction codes for CS:APP x86 subset
-    parameter IHALT = 4’h0;
-    parameter INOP = 4’h1;
-    parameter IRRMOVQ = 4’h2; // reg to reg move
-    parameter IIRMOVQ = 4’h3; // imediate to reg move
-    parameter IRMMOVQ = 4’h4; // reg to mem move
-    parameter IMRMOVQ = 4’h5; // mem to reg move
-    parameter IOPQ = 4’h6;
-    parameter IJXX = 4’h7;
-    parameter ICALL = 4’h8; // push ret to stack, jmp to dest
-    parameter IRET = 4’h9 // ret
-    parameter IPUSHQ = 4’hA;
-    parameter IPOPQ = 4’hB;
-    parameter IIADDQ = 4’hC; // add reg A to reg B, place in B
-    parameter ILEAVE = 4’hD;
-    parameter IPOP2 = 4’hE;
+    parameter IHALT = 4'h0;
+    parameter INOP = 4'h1; //nothing
+    parameter IRRMOVQ = 4'h2; // reg to reg move (regA = regB)
+    parameter IIRMOVQ = 4'h3; // imediate to reg move (regA = C)
+    parameter IRMMOVQ = 4'h4; // reg to mem move (regA to mem( regB) + C)
+    parameter IMRMOVQ = 4'h5; // mem to reg move (regA = mem(reg(B) + C))
+    parameter IOPQ = 4'h6; // regA <= regA op regB
+    parameter IJXX = 4'h7;// if CC = X PC <= regA +C
+  
 
     input clk;
+    input [2:0] mode;
+    input [63:0] download_val;
+    input [63:0] download_address;
+    input [63:0] upload_address;
+    output [63:0] upload_val;
+    output [3:0] status;
+
+    //mode  flags
+    wire reset;
+    wire download, upload, run, is_status_mode;
+    assign reset = (mode == RESET_MODE);
+    assign download = (mode == DOWNLOAD_MODE);
+    assign upload = (mode ==  UPLOAD_MODE);
+    assign run = (mode == RUN_MODE);
+    assign is_status_mode = (mode == STATUS_MODE);
+
+    assign status = mode == RESET_MODE ? RESET : 0 ;//temp
+
+
+
+
+    
 
     reg [63:0] PC;
     wire [63:0] new_PC;
@@ -1254,29 +1426,57 @@ module processor (clk)
     wire [63:0] dest_val_A, dest_val_B;
 
     wire [3:0] aluFUNC;
-    wire [3:0] CCodes;
+    wire [2:0] CCodes;
 
     wire [63:0] ALUOut;
 
+    //mem wires
+    wire [63: 0] memaddr;
+    wire wenable, renable;
+    wire [63: 0] wvalue, rvalue;
 
-    read_only_ram ram(PC, instr);
+
+
+
+
+
     //instruction on wire, now we need to extract pieces of it
     splitter split (instr, icode, ifunc);
-    align aligner (instr, needs_regs, needs_valC, regA, regB, valC);
+    align aligner (instr, needs_regs, regA, regB, valC);
 
     reg_file regs (regA, regB, valA, valB, destA, destB, dest_val_A, dest_val_B);
 
     alu ALU (valA, valB, valC, aluFUNC, CCodes, ALUOut);
+    ConditionCodes codes (clk, CCodes, reset, currentCodes);
+
+    banked_memory mem (clk, PC, memaddr, mok, iok, instr, wenable, renable, wvalue, rvalue); 
+    //ALUOUT is memaddr, if read and write are 0, then does nothing.
+    //destA is sometimes regA of doing op instructions.
+    //dest b is sometimes reg
 
 
     
+   // MUST BE SET FLAGS: ALUFUNC 
+
+   //MODE DOWNLOAD/ UPLOAD override
+   assign memaddr = (mode == DOWNLOAD_MODE) ? download_address :
+                        (mode == UPLOAD_MODE) ? upload_address : ALUOut;
+
+   assign wenable = (mode == DOWNLOAD_MODE) ? 1 : 0 ;//temp
+
+   assign renable = (mode == UPLOAD_MODE) ? 1 : 0 ;//temp
+
+   assign wvalue = (mode == DOWNLOAD_MODE) ? download_val : 0 ;//temp
+
+   assign upload_val = (mode == UPLOAD_MODE) ? rvalue : 0 ;//temp 0s
+
+   assign destA = (icode == IRRMOVQ | icode == IIRMOVQ |  | icode == IOPQ) ? regA : 15;
+   assign destB = (icode == IMRMOVQ)
 
 
 
-
-
-    assign needs_regs = (icode == IIADDQ || icode == IMRMOVQ || icode == IRMMOVQ || icode == IRRMOVQ || icode == IIRMOVQ);
-    assign needs_valC = ( icode ==  IRMMOVQ || icode == IMRMOVQ || icode == IIRMOVQ || icode == ICALL || icode == jmp);
+//     assign needs_regs = (icode == IIADDQ || icode == IMRMOVQ || icode == IRMMOVQ || icode == IRRMOVQ || icode == IIRMOVQ);
+//     assign needs_valC = ( icode ==  IRMMOVQ || icode == IMRMOVQ || icode == IIRMOVQ || icode == ICALL || icode == jmp);
     // if (icode == IIADDQ || icode == IMRMOVQ || icode == IRMMOVQ || icode == IRRMOVQ || icode == IIRMOVQ) begin  //might be wrong
     //     assign needs_regs = 1;
     //     else
@@ -1291,5 +1491,70 @@ module processor (clk)
 
 
 
-    always @(posedge clk)
-        PC <= new_PC;
+//     always @(posedge clk)
+//         PC <= new_PC;
+
+endmodule
+
+module control ();
+  // make a clk here and set up halting when the halt instruction is hit
+  reg clk;
+  reg [2:0] mode;
+  reg [63:0] download_val;
+  reg [63:0] download_address;
+  wire [63:0] upload_val;
+  reg [63:0] upload_address;
+  wire [3:0] status;
+
+  processor dut (clk, mode, download_val, upload_val, download_address, upload_address, status);
+
+
+  initial begin 
+        clk = 0;
+        $display("Simulation starting at time %0t", $time);
+        download_val <= 1;
+        download_address <= 0;
+        mode <= 1; //set mode to download'
+        #5
+        $display("mode is %d", mode);
+        #5 
+        clk = ~clk;
+        #5
+        clk = ~clk;
+        download_address <= 8;
+        download_val <= 2;
+        #5 
+        clk = ~clk;
+        #5
+        clk = ~clk;
+        download_address <= 16;
+        download_val <= 3;
+        #5 
+        clk = ~clk;
+        #5
+        clk = ~clk;
+        $display( "loaded download val: %h to address %h", download_val, download_address);
+        upload_address <= 0;
+        mode <= 2; //set to upload
+        #5
+        $display("mode is %d", mode);
+        #5 
+        clk = ~clk;
+        #5
+        clk = ~clk;
+        $display("upload value = %h from address: %h", upload_val, upload_address);
+        upload_address <= 8;
+        #5 
+        clk = ~clk;
+        #5
+        clk = ~clk;
+        $display("upload value = %h from address: %h", upload_val, upload_address);
+        upload_address <= 16;
+        #5 
+        clk = ~clk;
+        #5
+        clk = ~clk;
+        $display("upload value = %h from address: %h", upload_val, upload_address);
+  $finish;
+  end
+endmodule
