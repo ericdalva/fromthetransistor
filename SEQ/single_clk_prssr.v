@@ -154,9 +154,7 @@ module banked_memory (clk, iaddr, maddr, mok, iok, instr, wenable, renable, wval
     assign maddr14 = mindex;
     assign maddr15 = mindex;
 
-    initial begin
-    $monitor("mok = %b, wvalue = %h, maddr = %h, wenable9 = %b, wval9 = %h, wenable = %b, mval6 = %h, mval9 = %h, mbid = %h", iok, wvalue, maddr, wenable9, wval9, wenable, mval6, mval9, mbid);
-        end
+
     // this part is gross! I am sure there is a better way but I also 
     // spent more time thinking about it then it took to actually just implement it
 
@@ -1128,30 +1126,31 @@ module splitter (instr, icode, ifunc);
     assign ifunc = instr[75: 72];
 endmodule
 
-module align (instr, needs_regs, regA, regB, valC);
+module align (instr, regA, regB, valC);
     input [79:0] instr;
-    input needs_regs;
-    output [71:68] regA;
-    output [67:64] regB;
+    output [3:0] regA;
+    output [3:0] regB;
     output [63:0] valC;
 
     assign regA = instr[71:68];
     assign regB = instr[67:64];
-    assign valC = needs_regs ? instr[63:0]: instr[71:8] ;
+    assign valC = instr[63:0];
 endmodule
 
-module new_PC_module (PC, needs_regs, needs_valC, new_PC);
+module new_PC_module (PC, new_PC);
     input [63:0] PC;
-    input needs_regs, needs_valC;
     output [63:0] new_PC;            
-
-    assign new_PC = needs_regs ? (needs_valC ? PC + 10 : PC + 2) : PC + 1;
+    assign new_PC = PC +10;
 
 endmodule
 
-module reg_file (srcA, srcB, valA, valB, destA, destB, dest_val_A, dest_val_B, reset); //can out reg for debug if we want
+module reg_file (clk, srcA, srcB, valA, valB, destA, destB, dest_val_A, dest_val_B); //can out reg for debug if we want
+    
+    
     input [3:0] srcA, srcB, destA, destB;
     input [63:0] dest_val_A, dest_val_B;
+    input clk;
+    
     input reset;
     output [63:0]  valA, valB;
 
@@ -1311,6 +1310,8 @@ module reg_file (srcA, srcB, valA, valB, destA, destB, dest_val_A, dest_val_B, r
     assign write_enable13 = destA == REG13 || destB == REG13;
     assign write_enable14 = destA == REG14 || destB == REG14;
     assign write_enable15 = destA == REG15 || destB == REG15;
+
+
 endmodule
 
 
@@ -1326,10 +1327,14 @@ module alu (valA, valB, valC, aluFUNC, CCodes, outVal);
     parameter XOR = 4'h1;
     parameter AND = 4'h2;
     parameter SUB = 4'h3;
+    parameter ADD_C = 4'h4;
+    parameter PASS_C = 4'h5;
 
     assign outVal = aluFUNC == ADD ? valA + valB : 
                     aluFUNC == XOR ? valA ^ valB : //think this is XOR
-                    aluFUNC == AND ? valA & valB : valA - valB;
+                    aluFUNC == AND ? valA & valB : 
+                    aluFUNC == SUB ? valA - valB :
+                    aluFUNC == ADD_C ? valB + valC : valC;
 
     //set CCodes
     //only need 3 bits but not going to change num
@@ -1375,6 +1380,7 @@ module processor (clk, mode, download_val, upload_val, download_address, upload_
 
 
     //instruction codes for CS:APP x86 subset
+    //all commands are 10 words
     parameter IHALT = 4'h0;
     parameter INOP = 4'h1; //nothing
     parameter IRRMOVQ = 4'h2; // reg to reg move (regA = regB)
@@ -1382,7 +1388,7 @@ module processor (clk, mode, download_val, upload_val, download_address, upload_
     parameter IRMMOVQ = 4'h4; // reg to mem move (regA to mem( regB) + C)
     parameter IMRMOVQ = 4'h5; // mem to reg move (regA = mem(reg(B) + C))
     parameter IOPQ = 4'h6; // regA <= regA op regB
-    parameter IJXX = 4'h7;// if CC = X PC <= regA +C
+    parameter IJXX = 4'h7;// if CC = X PC <= regB +C
   
 
     input clk;
@@ -1405,7 +1411,8 @@ module processor (clk, mode, download_val, upload_val, download_address, upload_
     assign status = mode == RESET_MODE ? RESET : 0 ;//temp
 
 
-
+    wire clock;
+    assign clock = clk;
 
     
 
@@ -1414,8 +1421,6 @@ module processor (clk, mode, download_val, upload_val, download_address, upload_
     wire [79:0] instr;
     wire [3:0] icode;
     wire [3:0] ifunc;
-    wire needs_regs;
-    wire needs_valC;
 
     wire [3:0] regA;
     wire [3:0] regB;
@@ -1438,16 +1443,17 @@ module processor (clk, mode, download_val, upload_val, download_address, upload_
 
 
 
-
-
     //instruction on wire, now we need to extract pieces of it
     splitter split (instr, icode, ifunc);
-    align aligner (instr, needs_regs, regA, regB, valC);
+    align aligner (instr, regA, regB, valC);
 
-    reg_file regs (regA, regB, valA, valB, destA, destB, dest_val_A, dest_val_B);
+    reg_file regs (clk, regA, regB, valA, valB, destA, destB, dest_val_A, dest_val_B);
 
     alu ALU (valA, valB, valC, aluFUNC, CCodes, ALUOut);
     ConditionCodes codes (clk, CCodes, reset, currentCodes);
+
+    assign dest_val_A = ALUOut;
+    assign dest_val_B = rvalue;
 
     banked_memory mem (clk, PC, memaddr, mok, iok, instr, wenable, renable, wvalue, rvalue); 
     //ALUOUT is memaddr, if read and write are 0, then does nothing.
@@ -1461,17 +1467,25 @@ module processor (clk, mode, download_val, upload_val, download_address, upload_
    //MODE DOWNLOAD/ UPLOAD override
    assign memaddr = (mode == DOWNLOAD_MODE) ? download_address :
                         (mode == UPLOAD_MODE) ? upload_address : ALUOut;
+   assign wenable = (mode == DOWNLOAD_MODE) ? 1 :
+                 (mode == RUN_MODE && icode == IRMMOVQ) ? 1 : 0;
 
-   assign wenable = (mode == DOWNLOAD_MODE) ? 1 : 0 ;//temp
+   assign renable = (mode == UPLOAD_MODE) ? 1 : 
+                        (mode == RUN_MODE && icode == IMRMOVQ) ? 1 : 0;
 
-   assign renable = (mode == UPLOAD_MODE) ? 1 : 0 ;//temp
-
-   assign wvalue = (mode == DOWNLOAD_MODE) ? download_val : 0 ;//temp
+   assign wvalue = (mode == DOWNLOAD_MODE) ? download_val :
+                (mode == RUN_MODE && icode == IRMMOVQ) ? ALUOut : 0;
 
    assign upload_val = (mode == UPLOAD_MODE) ? rvalue : 0 ;//temp 0s
 
-   assign destA = (icode == IRRMOVQ | icode == IIRMOVQ |  | icode == IOPQ) ? regA : 15;
-   assign destB = (icode == IMRMOVQ)
+   
+
+   assign destA = (icode == IRRMOVQ | icode == IIRMOVQ | icode == IOPQ) ? regA : 15;
+   assign destB = (icode == IMRMOVQ) ? regA : 15;
+   assign aluFUNC = (icode == IRRMOVQ  | icode == IMRMOVQ | icode == IRMMOVQ) ? 4'h4  : //ADD_C
+                        icode == IIRMOVQ ? 4'h5 : //PASS_C
+                        icode == IOPQ ? ifunc : 0; //not sure what this should be during jmp
+   
 
 
 
@@ -1491,13 +1505,26 @@ module processor (clk, mode, download_val, upload_val, download_address, upload_
 
 
 
-//     always @(posedge clk)
-//         PC <= new_PC;
+    always @(posedge clk) begin
+        if (mode == RESET_MODE) 
+                PC <= 0;
+        else
+                PC <= PC + 10;
+    end
+
 
 endmodule
 
 module control ();
   // make a clk here and set up halting when the halt instruction is hit
+
+    parameter RUN_MODE = 0;
+    parameter DOWNLOAD_MODE = 1; //downloads a word to a mem address
+    parameter UPLOAD_MODE = 2; //returns a word from a mem address
+    parameter RESET_MODE = 3; //sets CC, regs, PC = 0, sends RESET status.
+    parameter STATUS_MODE = 4;
+
+
   reg clk;
   reg [2:0] mode;
   reg [63:0] download_val;
@@ -1508,53 +1535,290 @@ module control ();
 
   processor dut (clk, mode, download_val, upload_val, download_address, upload_address, status);
 
+ //TEST MODES
+//   initial begin 
+//         clk = 0;
+//         $display("Simulation starting at time %0t", $time);
+//         download_val <= 1;
+//         download_address <= 0;
+//         mode <= 1; //set mode to download'
+//         #5
+//         $display("mode is %d", mode);
+//         #5 
+//         clk = ~clk;
+//         #5
+//         clk = ~clk;
+//         download_address <= 8;
+//         download_val <= 2;
+//         #5 
+//         clk = ~clk;
+//         #5
+//         clk = ~clk;
+//         download_address <= 16;
+//         download_val <= 3;
+//         #5 
+//         clk = ~clk;
+//         #5
+//         clk = ~clk;
+//         $display( "loaded download val: %h to address %h", download_val, download_address);
+//         upload_address <= 0;
+//         mode <= 2; //set to upload
+//         #5
+//         $display("mode is %d", mode);
+//         #5 
+//         clk = ~clk;
+//         #5
+//         clk = ~clk;
+//         $display("upload value = %h from address: %h", upload_val, upload_address);
+//         upload_address <= 8;
+//         #5 
+//         clk = ~clk;
+//         #5
+//         clk = ~clk;
+//         $display("upload value = %h from address: %h", upload_val, upload_address);
+//         upload_address <= 16;
+//         #5 
+//         clk = ~clk;
+//         #5
+//         clk = ~clk;
+//         $display("upload value = %h from address: %h", upload_val, upload_address);
+//   $finish;
+//   end
 
-  initial begin 
-        clk = 0;
-        $display("Simulation starting at time %0t", $time);
-        download_val <= 1;
-        download_address <= 0;
-        mode <= 1; //set mode to download'
-        #5
-        $display("mode is %d", mode);
-        #5 
-        clk = ~clk;
-        #5
-        clk = ~clk;
-        download_address <= 8;
-        download_val <= 2;
-        #5 
-        clk = ~clk;
-        #5
-        clk = ~clk;
-        download_address <= 16;
-        download_val <= 3;
-        #5 
-        clk = ~clk;
-        #5
-        clk = ~clk;
-        $display( "loaded download val: %h to address %h", download_val, download_address);
-        upload_address <= 0;
-        mode <= 2; //set to upload
-        #5
-        $display("mode is %d", mode);
-        #5 
-        clk = ~clk;
-        #5
-        clk = ~clk;
-        $display("upload value = %h from address: %h", upload_val, upload_address);
-        upload_address <= 8;
-        #5 
-        clk = ~clk;
-        #5
-        clk = ~clk;
-        $display("upload value = %h from address: %h", upload_val, upload_address);
-        upload_address <= 16;
-        #5 
-        clk = ~clk;
-        #5
-        clk = ~clk;
-        $display("upload value = %h from address: %h", upload_val, upload_address);
-  $finish;
-  end
+// initial begin
+//         clk = 0 
+//         $display("testing load imidiate");
+//         #5
+//         mode <= DOWNLOAD_MODE;
+//         download_address <= 0;
+//         download_val < = IIRMOVQ + REG0 + REG0 + //extend to 64 bits;
+//         #5
+//         clk = !clk
+//         #5
+//         clk = !=clk
+//         download_address <= 8
+//         download_val = 16'b0000000000000001 //extend to 64 bits
+//         #5
+//         clk = !clk 
+//         #5
+//         clk = !clk
+//         $display("IIRMOVEQ REG0 REG0 +C, C=1 in first 10 bits of mem");
+//         mode <= RESET_MODE; //set PC to zero
+//         #5
+//         clk = !clk 
+//         #5
+//         clk = !clk
+//         $display("exiting Reset mode, PC should be 0");
+//         mode <= RUN_MODE;
+//         #5
+//         clk = !clk 
+//         #5
+//         clk = !clk
+//         $finish
+//end 
+
+//WORKING INSTRUCTIONS : IIRMOVE, IRRMOVE, IRMMOVE, IMRMOVE
+initial begin
+        $monitor(
+                "dest_val_A = %h, destA = %h, reg0_out = %h\n\
+                instr = %h, aluFUNC = %h, PC = %h\n\
+                mok = %b, wvalue = %h, maddr = %h, wenable9 = %b, \n\
+                wval9 = %h, wenable = %b, mval6 = %h, mval9 = %h, mbid = %h \n\
+                regA = %h, regB = %h, icode = %h, memory_wvalue = %h \n\
+                reg_out0 = %h, alu_outVal = %h, regs_updateVal0 = %h \n\
+                wenable0 = %h, banked_reg0_output_val = %h, BR0_clk = %b, pssr_clk = %b, codes_clk = %b \n\
+                reg_file_clk = %b",
+                
+                dut.dest_val_A,           // In processor
+                dut.destA,                // In processor
+                dut.regs.out0,            // In reg_file instance
+                
+                dut.instr,                // In processor
+                dut.aluFUNC,             // In processor
+                dut.PC,                   // In processor
+                
+                dut.mem.mok,             // In banked_memory instance
+                dut.mem.wvalue,          // In banked_memory instance
+                dut.mem.maddr,         // In banked_memory instance (note: maddr → memaddr)
+                dut.mem.wenable9,        // In banked_memory instance
+                dut.mem.wval9,           // In banked_memory instance
+                dut.wenable,         // In banked_memory instance
+                dut.mem.mval6,           // In banked_memory instance
+                dut.mem.mval9,           // In banked_memory instance
+                dut.mem.mbid,             // In banked_memory instance
+
+
+                dut.regA,
+                dut.regB,
+                dut.icode,
+                dut.wvalue,
+                dut.regs.out2,
+                dut.ALUOut,
+
+                dut.regs.update_val0,
+                dut.regs.write_enable0,
+                dut.regs.reg0.output_val,
+
+                dut.regs.reg0.clk,
+                dut.clk,
+                dut.codes.clk,
+                dut.regs.clk,
+
+                );
+    // Initialize clock and parameters
+    clk = 0;
+    $display("Testing load immediate (IIRMOVQ)");
+    
+    // We need to download the instruction in multiple parts since download_val is 64 bits
+    // First download: First 8 bytes of instruction
+    // IIRMOVQ = 3, REG0 = 0
+    mode = DOWNLOAD_MODE;
+    download_address = 0;
+    // First 8 bytes: icode(3) | ifunc(0) | regA(0) | regB(0) | first 60 bits of valC
+    download_val = 64'h3010_0000_0000_0000; //IIRMOVE WORKS! MOVE VAL TO REG 1
+    
+    // Clock cycle to process first download
+    #5 clk = ~clk;
+    #5 clk = ~clk;
+    
+    // Second download: Last byte containing end of immediate value
+    #5 clk = ~clk;
+    #5 clk = ~clk;
+    download_address = 2;
+    download_val = 64'h0000_0000_0000_0345;
+    
+    download_address = 10;
+    download_val = 64'h30E0_0000_0000_0000; //MOVE 0 to REG 14
+    #5 clk = ~clk;
+    #5 clk = ~clk;
+    download_address = 12;
+    download_val = 64'h0000_0000_0000_0000;
+
+
+    //IRRMOVE TEST : move reg1 to reg 0
+    #5 clk = ~clk;
+    #5 clk = ~clk;
+    download_address = 20;
+    download_val = 64'h2001_0000_0000_0000;
+    #5 clk = ~clk;
+    #5 clk = ~clk;
+    download_address = 22;
+    download_val = 64'h0000_0000_0000_0000;
+    #5 clk = ~clk;
+    #5 clk = ~clk;
+
+    //IRMMOVE TEST : move reg0 to mem 100
+    
+    #5 clk = ~clk;
+    #5 clk = ~clk;
+    download_address = 20;
+    download_val = 64'h400E_0000_0000_0000;
+    #5 clk = ~clk;
+    #5 clk = ~clk;
+    download_address = 22;
+    download_val = 64'h0000_0000_0000_0064;
+    #5 clk = ~clk;
+    #5 clk = ~clk;
+
+    //IMRMOVE TEST : move 100 to reg2
+
+    #5 clk = ~clk;
+    #5 clk = ~clk;
+    download_address = 30;
+    download_val = 64'h502E_0000_0000_0000;
+    #5 clk = ~clk;
+    #5 clk = ~clk;
+    download_address = 32;
+    download_val = 64'h0000_0000_0000_0064;
+    #5 clk = ~clk;
+    #5 clk = ~clk;
+
+    // IADDQ : reg2 ADD reg0
+    #5 clk = ~clk;
+    #5 clk = ~clk;
+    download_address = 40;
+    download_val = 64'h6020_0000_0000_0000;
+    #5 clk = ~clk;
+    #5 clk = ~clk;
+    download_address = 42;
+    download_val = 64'h0000_0000_0000_0000;
+    #5 clk = ~clk;
+    #5 clk = ~clk;
+
+    //IANDQ : reg2 AND reg14
+    #5 clk = ~clk;
+    #5 clk = ~clk;
+    download_address = 50;
+    download_val = 64'h612E_0000_0000_0000;
+    #5 clk = ~clk;
+    #5 clk = ~clk;
+    download_address = 52;
+    download_val = 64'h0000_0000_0000_0000;
+    #5 clk = ~clk;
+    #5 clk = ~clk;
+
+    //IXORQ : reg2 xor reg0
+    #5 clk = ~clk;
+    #5 clk = ~clk;
+    download_address = 60;
+    download_val = 64'h6220_0000_0000_0000;
+    #5 clk = ~clk;
+    #5 clk = ~clk;
+    download_address = 62;
+    download_val = 64'h0000_0000_0000_0000;
+    #5 clk = ~clk;
+    #5 clk = ~clk;
+
+
+    
+    // Clock cycle to process second download
+    #5 clk = ~clk;
+    #5 clk = ~clk;
+    
+    $display("Downloaded IIRMOVQ instruction to memory");
+    
+    // Reset processor to start execution
+    mode = RESET_MODE;
+    #5 clk = ~clk;
+    #5 clk = ~clk;
+    $display("Reset complete, PC = 0");
+    
+    // Run the instruction
+    mode = RUN_MODE;
+    #5 clk = ~clk;
+    #5 clk = ~clk;
+    $display("Executed IIRMOVQ instruction");
+    #5 clk = ~clk;
+    #5 clk = ~clk;
+    $display("Executed IIRMOVQ instruction");
+    #5 clk = ~clk;
+    #5 clk = ~clk;
+    $display("Executed IRRMOVQ instruction");
+    #5 clk = ~clk;
+    #5 clk = ~clk;
+    $display("Executed IRMMOVQ instruction");
+    #5 clk = ~clk;
+    #5 clk = ~clk;
+    $display("Executed IMRMOVQ instruction");
+    #5 clk = ~clk;
+    #5 clk = ~clk;
+    $display("Executed IADDQ instruction");
+    #5 clk = ~clk;
+    #5 clk = ~clk;
+    $display("Executed IANDQ instruction");
+    #5 clk = ~clk;
+    #5 clk = ~clk;
+    $display("Executed IXORQ instruction");
+    mode = UPLOAD_MODE;
+    upload_address = 100;
+    #5 clk = ~clk;
+    #5 clk = ~clk;
+    $display("upload_val = %h", upload_val);
+    
+    $finish;
+end
+
+
+
+
 endmodule
