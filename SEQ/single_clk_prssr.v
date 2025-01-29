@@ -1324,8 +1324,9 @@ module alu (valA, valB, valC, aluFUNC, CCodes, outVal);
     output [63:0] outVal;
 
     parameter ADD = 4'h0;
-    parameter XOR = 4'h1;
-    parameter AND = 4'h2;
+    parameter AND = 4'h1;
+    parameter XOR = 4'h2;
+    
     parameter SUB = 4'h3;
     parameter ADD_C = 4'h4;
     parameter PASS_C = 4'h5;
@@ -1434,6 +1435,7 @@ module processor (clk, mode, download_val, upload_val, download_address, upload_
     wire [2:0] CCodes;
 
     wire [63:0] ALUOut;
+    wire [2:0] currentCodes;
 
     //mem wires
     wire [63: 0] memaddr;
@@ -1474,7 +1476,7 @@ module processor (clk, mode, download_val, upload_val, download_address, upload_
                         (mode == RUN_MODE && icode == IMRMOVQ) ? 1 : 0;
 
    assign wvalue = (mode == DOWNLOAD_MODE) ? download_val :
-                (mode == RUN_MODE && icode == IRMMOVQ) ? ALUOut : 0;
+                (mode == RUN_MODE && icode == IRMMOVQ) ? valA: 0;
 
    assign upload_val = (mode == UPLOAD_MODE) ? rvalue : 0 ;//temp 0s
 
@@ -1505,13 +1507,18 @@ module processor (clk, mode, download_val, upload_val, download_address, upload_
 
 
 
-    always @(posedge clk) begin
-        if (mode == RESET_MODE) 
-                PC <= 0;
-        else
+        always @(posedge clk) begin
+        if (mode == RESET_MODE)
+        PC <= 0;
+        else if (icode == IJXX) begin
+        if (ifunc == 0 && !currentCodes[2] || ifunc == 1)
+                PC <= valC;
+        else 
                 PC <= PC + 10;
-    end
-
+        end
+        else
+        PC <= PC + 10;
+        end
 
 endmodule
 
@@ -1620,49 +1627,38 @@ module control ();
 //WORKING INSTRUCTIONS : IIRMOVE, IRRMOVE, IRMMOVE, IMRMOVE
 initial begin
         $monitor(
-                "dest_val_A = %h, destA = %h, reg0_out = %h\n\
+                "dest_val_A = %h, destA = %h,\n\
+                dest_val_B = %h, destB = %h, \n\
                 instr = %h, aluFUNC = %h, PC = %h\n\
-                mok = %b, wvalue = %h, maddr = %h, wenable9 = %b, \n\
-                wval9 = %h, wenable = %b, mval6 = %h, mval9 = %h, mbid = %h \n\
-                regA = %h, regB = %h, icode = %h, memory_wvalue = %h \n\
-                reg_out0 = %h, alu_outVal = %h, regs_updateVal0 = %h \n\
-                wenable0 = %h, banked_reg0_output_val = %h, BR0_clk = %b, pssr_clk = %b, codes_clk = %b \n\
-                reg_file_clk = %b",
+                alu_valA = %h, alu_valB = %h, \n\ alu_valC = %h, alu_outVal = %h, \n\
+                wenable0 = %h, wenable1 = %h \n\
+                reg0 = %h, reg1 = %h, reg2 = %h, reg13 = %h, reg14 = %h, reg15 = %h",
                 
                 dut.dest_val_A,           // In processor
                 dut.destA,                // In processor
-                dut.regs.out0,            // In reg_file instance
-                
+                dut.dest_val_A,
+                dut.destB,
+
                 dut.instr,                // In processor
                 dut.aluFUNC,             // In processor
                 dut.PC,                   // In processor
-                
-                dut.mem.mok,             // In banked_memory instance
-                dut.mem.wvalue,          // In banked_memory instance
-                dut.mem.maddr,         // In banked_memory instance (note: maddr → memaddr)
-                dut.mem.wenable9,        // In banked_memory instance
-                dut.mem.wval9,           // In banked_memory instance
-                dut.wenable,         // In banked_memory instance
-                dut.mem.mval6,           // In banked_memory instance
-                dut.mem.mval9,           // In banked_memory instance
-                dut.mem.mbid,             // In banked_memory instance
 
-
-                dut.regA,
-                dut.regB,
-                dut.icode,
-                dut.wvalue,
-                dut.regs.out2,
+                dut.ALU.valA,
+                dut.ALU.valB,
+                dut.ALU.valC,
+        
                 dut.ALUOut,
 
-                dut.regs.update_val0,
                 dut.regs.write_enable0,
-                dut.regs.reg0.output_val,
+                dut.regs.write_enable1,
 
-                dut.regs.reg0.clk,
-                dut.clk,
-                dut.codes.clk,
-                dut.regs.clk,
+                dut.regs.out0,
+                dut.regs.out1,
+                dut.regs.out2,
+                dut.regs.out13,
+                dut.regs.out14,
+                dut.regs.out15,
+                
 
                 );
     // Initialize clock and parameters
@@ -1674,7 +1670,7 @@ initial begin
     // IIRMOVQ = 3, REG0 = 0
     mode = DOWNLOAD_MODE;
     download_address = 0;
-    // First 8 bytes: icode(3) | ifunc(0) | regA(0) | regB(0) | first 60 bits of valC
+    // First 8 bytes: icode(3) | ifunc(0) | regA(0) | regB(0) | 
     download_val = 64'h3010_0000_0000_0000; //IIRMOVE WORKS! MOVE VAL TO REG 1
     
     // Clock cycle to process first download
@@ -1686,9 +1682,11 @@ initial begin
     #5 clk = ~clk;
     download_address = 2;
     download_val = 64'h0000_0000_0000_0345;
+    #5 clk = ~clk;
+    #5 clk = ~clk;
     
     download_address = 10;
-    download_val = 64'h30E0_0000_0000_0000; //MOVE 0 to REG 14
+    download_val = 64'h30e0_0000_0000_0000; //MOVE 0 to REG 14
     #5 clk = ~clk;
     #5 clk = ~clk;
     download_address = 12;
@@ -1711,11 +1709,11 @@ initial begin
     
     #5 clk = ~clk;
     #5 clk = ~clk;
-    download_address = 20;
+    download_address = 30;
     download_val = 64'h400E_0000_0000_0000;
     #5 clk = ~clk;
     #5 clk = ~clk;
-    download_address = 22;
+    download_address = 32;
     download_val = 64'h0000_0000_0000_0064;
     #5 clk = ~clk;
     #5 clk = ~clk;
@@ -1724,11 +1722,11 @@ initial begin
 
     #5 clk = ~clk;
     #5 clk = ~clk;
-    download_address = 30;
+    download_address = 40;
     download_val = 64'h502E_0000_0000_0000;
     #5 clk = ~clk;
     #5 clk = ~clk;
-    download_address = 32;
+    download_address = 42;
     download_val = 64'h0000_0000_0000_0064;
     #5 clk = ~clk;
     #5 clk = ~clk;
@@ -1736,20 +1734,8 @@ initial begin
     // IADDQ : reg2 ADD reg0
     #5 clk = ~clk;
     #5 clk = ~clk;
-    download_address = 40;
-    download_val = 64'h6020_0000_0000_0000;
-    #5 clk = ~clk;
-    #5 clk = ~clk;
-    download_address = 42;
-    download_val = 64'h0000_0000_0000_0000;
-    #5 clk = ~clk;
-    #5 clk = ~clk;
-
-    //IANDQ : reg2 AND reg14
-    #5 clk = ~clk;
-    #5 clk = ~clk;
     download_address = 50;
-    download_val = 64'h612E_0000_0000_0000;
+    download_val = 64'h6020_0000_0000_0000;
     #5 clk = ~clk;
     #5 clk = ~clk;
     download_address = 52;
@@ -1757,14 +1743,35 @@ initial begin
     #5 clk = ~clk;
     #5 clk = ~clk;
 
-    //IXORQ : reg2 xor reg0
+    //IANDQ : reg2 AND reg14
     #5 clk = ~clk;
     #5 clk = ~clk;
     download_address = 60;
-    download_val = 64'h6220_0000_0000_0000;
+    download_val = 64'h612E_0000_0000_0000;
     #5 clk = ~clk;
     #5 clk = ~clk;
     download_address = 62;
+    download_val = 64'h0000_0000_0000_0000;
+    #5 clk = ~clk;
+    #5 clk = ~clk;
+
+    //IXORQ : reg2 xor reg0
+    #5 clk = ~clk;
+    #5 clk = ~clk;
+    download_address = 70;
+    download_val = 64'h6220_0000_0000_0000;
+    #5 clk = ~clk;
+    #5 clk = ~clk;
+    download_address = 72;
+    download_val = 64'h0000_0000_0000_0000;
+    #5 clk = ~clk;
+    #5 clk = ~clk;
+    // jmp to 0
+    download_address = 80;
+    download_val = 64'h7100_0000_0000_0000;
+    #5 clk = ~clk;
+    #5 clk = ~clk;
+    download_address = 82;
     download_val = 64'h0000_0000_0000_0000;
     #5 clk = ~clk;
     #5 clk = ~clk;
